@@ -9,21 +9,23 @@ public record Profile
     public string FirstName { get; set; }
     public string LastName { get; set; }
 
-    public string? Post;
-    public List<string> Following;
-    public List<string> Followers;
+    public List<string> Following = new();
+    public List<string> Followers = new();
 
-    public Profile([Required] string Username, [Required] string Email, [Required] string Password,
-        [Required] string FirstName, [Required] string LastName, string? Post = null)
+    public Profile([Required] string username, [Required] string email, [Required] string password,
+        [Required] string firstName, [Required] string lastName)
     {
-        this.Username = Username;
-        this.Email = Email;
-        this.Password = Password;
-        this.FirstName = FirstName;
-        this.LastName = LastName;
-        this.Post = Post;
-        this.Following = new List<string>();
-        this.Followers = new List<string>();
+        Username = username;
+        Email = email;
+        Password = password;
+        FirstName = firstName;
+        LastName = lastName;
+    }
+
+    public void SetTo(PutProfile putProfile)
+    {
+        FirstName = putProfile.FirstName;
+        LastName = putProfile.LastName;
     }
 
 }
