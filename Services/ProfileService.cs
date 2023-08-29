@@ -1,30 +1,36 @@
 ﻿using AmazonAppBackend.DTO;
+using AmazonAppBackend.Exceptions.ProfileExceptions;
+using AmazonAppBackend.Extensions;
+using AmazonAppBackend.Storage.ProfileStore;
+
 namespace AmazonAppBackend.Services;
 
 public class ProfileService : IProfileService
 {
-    public Task<Profile> CreateProfile(Profile profile)
+    private readonly IProfileStore _profileStore;
+
+    public ProfileService(IProfileStore profileStore)
     {
-        throw new NotImplementedException();
+        _profileStore = profileStore;
+    }
+    public async Task<Profile> CreateProfile(Profile profile)
+    {
+        await _profileStore.CheckUniqueEmail(profile.Email);
+        return await _profileStore.CreateProfile(profile);
     }
 
-    public Task DeleteProfile(string username)
+    public async Task DeleteProfile(string username)
     {
-        throw new NotImplementedException();
+        await _profileStore.DeleteProfile(username);
     }
 
-    public Task<Profile> GetProfile(string username)
+    public async Task<Profile> GetProfile(string username)
     {
-        throw new NotImplementedException();
+        return await _profileStore.GetProfile(username);
     }
 
-    public Task<Profile> GetProfileByEmail(string email)
+    public async Task<Profile> UpdateProfile(Profile profile)
     {
-        throw new NotImplementedException();
-    }
-
-    public Task<Profile> UpdateProfile(string username, Profile profile)
-    {
-        throw new NotImplementedException();
+        return await _profileStore.UpdateProfile(profile);
     }
 }

@@ -1,4 +1,5 @@
 using AmazonAppBackend.Services;
+using AmazonAppBackend.Storage.ProfileStore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +10,7 @@ builder.Services.AddSwaggerGen();
 
 // Add singletons
 builder.Services.AddSingleton<IProfileService, ProfileService>();
+builder.Services.AddSingleton<IProfileStore, InMemoryProfileStore>();
 
 var app = builder.Build();
 // Configure the HTTP request pipeline.
