@@ -1,4 +1,5 @@
 using AmazonAppBackend.Services;
+using AmazonAppBackend.Storage.FriendRequestStore;
 using AmazonAppBackend.Storage.ProfileStore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +12,8 @@ builder.Services.AddSwaggerGen();
 // Add singletons
 builder.Services.AddSingleton<IProfileService, ProfileService>();
 builder.Services.AddSingleton<IProfileStore, InMemoryProfileStore>();
+builder.Services.AddSingleton<IFriendService, FriendService>();
+builder.Services.AddSingleton<IFriendRequestStore, InMemoryRequestStore>();
 
 var app = builder.Build();
 // Configure the HTTP request pipeline.

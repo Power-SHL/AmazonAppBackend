@@ -1,6 +1,8 @@
 ﻿using AmazonAppBackend.DTO;
+using AmazonAppBackend.Exceptions.FriendExceptions;
 using AmazonAppBackend.Exceptions.ProfileExceptions;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.AspNetCore.Hosting.StaticWebAssets;
+using System.Collections.Generic;
 
 namespace AmazonAppBackend.Storage.ProfileStore;
 
@@ -59,4 +61,28 @@ public class InMemoryProfileStore : IProfileStore
     {
         return _profiles.Remove(username) ? Task.CompletedTask : throw new ProfileNotFoundException();
     }
-}   
+
+    public Task AddFriend(string friend1, string friend2)
+    {
+        if (_profiles.TryGetValue(friend1, out var profile))
+        {
+            profile.Friends.Add(new Friend(friend2));
+            return Task.CompletedTask;
+        }
+        throw new ProfileNotFoundException($"{friend1} was not found.");
+    }
+
+    public Task RemoveFriend(string friend1, string friend2)
+    {
+        if (_profiles.TryGetValue(friend1, out var profile))
+        {
+            int removedElements = profile.Friends.RemoveAll(user => user.Username == friend2);
+            if(removedElements == 0)
+            {
+                throw new FriendNotFoundException($"{friend2} is not listed as a friend of {friend1}.");
+            }
+            return Task.CompletedTask;
+        }
+        throw new ProfileNotFoundException($"{friend1} was not found.");
+    }
+}
