@@ -9,8 +9,7 @@ public record Profile
     public string FirstName { get; set; }
     public string LastName { get; set; }
 
-    public List<string> Following = new();
-    public List<string> Followers = new();
+    public List<Friend> Friends = new();
 
     public Profile([Required] string username, [Required] string email, [Required] string password,
         [Required] string firstName, [Required] string lastName)

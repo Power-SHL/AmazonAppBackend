@@ -2,6 +2,8 @@
 using AmazonAppBackend.Exceptions.ProfileExceptions;
 using AmazonAppBackend.Storage.ProfileStore;
 using System.Text;
+using AmazonAppBackend.Exceptions.FriendExceptions;
+using AmazonAppBackend.Services;
 
 namespace AmazonAppBackend.Extensions;
 
@@ -23,59 +25,29 @@ public static class ProfileExtensions
             throw;
         }
     }
-
-    public static void ValidateProfile(this Profile profile)
+    public static async Task CheckProfilesExist(this IProfileStore profileStore, List<string> usernames)
     {
+        List<Task> tasks = new();
         StringBuilder errorMessage = new();
 
-        if (!profile.Email.IsValidEmail())
+        foreach (string username in usernames)
         {
-            errorMessage.Append("Email format is invalid.\n");
+            tasks.Add(Task.Run(async () =>
+            {
+                try
+                {
+                    await profileStore.GetProfile(username);
+                }
+                catch
+                {
+                    errorMessage.Append(username + ", ");
+                }
+            }));
         }
-
-        if (!profile.Password.IsValidPassword())
+        await Task.WhenAll(tasks);
+        if (errorMessage.Length > 0)
         {
-            errorMessage.Append("Password format is invalid.\n");
-        }
-
-        if (!profile.Username.IsValidUsername())
-        {
-            errorMessage.Append("Username format is invalid.\n");
-        }
-
-        if (!profile.FirstName.IsValidName())
-        {
-            errorMessage.Append("First name format is invalid.\n");
-        }
-
-        if (!profile.LastName.IsValidName())
-        {
-            errorMessage.Append("Last name format is invalid.\n");
-        }
-
-        if (errorMessage.Length != 0)
-        {
-            throw new ProfileInvalidException(errorMessage.ToString());
+            throw new ProfileNotFoundException($"Profile(s) {errorMessage} do not exist.");
         }
     }
-
-    public static void ValidatePutProfile(this PutProfile putProfile)
-    {
-        StringBuilder errorMessage = new();
-
-        if (!putProfile.FirstName.IsValidName())
-        {
-            errorMessage.Append("First name format is invalid.\n");
-        }
-
-        if (!putProfile.LastName.IsValidName())
-        {
-            errorMessage.Append("Last name format is invalid.\n");
-        }
-
-        if (errorMessage.Length != 0)
-        {
-            throw new ProfileInvalidException(errorMessage.ToString());
-        }
-    }   
 }

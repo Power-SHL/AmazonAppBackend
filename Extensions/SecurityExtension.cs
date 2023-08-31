@@ -1,6 +1,9 @@
-﻿using System.Security.Cryptography;
+﻿using AmazonAppBackend.DTO;
+using AmazonAppBackend.Exceptions.ProfileExceptions;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+using AmazonAppBackend.Exceptions.FriendExceptions;
 
 namespace AmazonAppBackend.Extensions;
 public static class SecurityExtension
@@ -82,6 +85,85 @@ public static class SecurityExtension
         catch (RegexMatchTimeoutException)
         {
             return false;
+        }
+    }
+
+    public static void ValidateProfile(this Profile profile)
+    {
+        StringBuilder errorMessage = new();
+
+        if (!profile.Email.IsValidEmail())
+        {
+            errorMessage.Append("Email format is invalid.\n");
+        }
+
+        if (!profile.Password.IsValidPassword())
+        {
+            errorMessage.Append("Password format is invalid.\n");
+        }
+
+        if (!profile.Username.IsValidUsername())
+        {
+            errorMessage.Append("Username format is invalid.\n");
+        }
+
+        if (!profile.FirstName.IsValidName())
+        {
+            errorMessage.Append("First name format is invalid.\n");
+        }
+
+        if (!profile.LastName.IsValidName())
+        {
+            errorMessage.Append("Last name format is invalid.\n");
+        }
+
+        if (errorMessage.Length != 0)
+        {
+            throw new ProfileInvalidException(errorMessage.ToString());
+        }
+    }
+
+    public static void ValidatePutProfile(this PutProfile putProfile)
+    {
+        StringBuilder errorMessage = new();
+
+        if (!putProfile.FirstName.IsValidName())
+        {
+            errorMessage.Append("First name format is invalid.\n");
+        }
+
+        if (!putProfile.LastName.IsValidName())
+        {
+            errorMessage.Append("Last name format is invalid.\n");
+        }
+
+        if (errorMessage.Length != 0)
+        {
+            throw new ProfileInvalidException(errorMessage.ToString());
+        }
+    }
+
+    public static void ValidateFriendRequest(this FriendRequest request)
+    {
+        StringBuilder errorMessage = new();
+        if (request.Sender == request.Receiver)
+        {
+            errorMessage.Append("Sender and receiver cannot be the same.\n");
+        }
+
+        if (!request.Sender.IsValidUsername())
+        {
+            errorMessage.Append("First name format is invalid.\n");
+        }
+
+        if (!request.Receiver.IsValidUsername())
+        {
+            errorMessage.Append("Last name format is invalid.\n");
+        }
+
+        if (errorMessage.Length != 0)
+        {
+            throw new FriendRequestInvalidException(errorMessage.ToString());
         }
     }
 }

@@ -6,5 +6,7 @@ public interface IProfileStore
     Task<Profile> GetProfileByEmail(string email);
     Task<Profile> CreateProfile(Profile profile);
     Task<Profile> UpdateProfile(Profile profile);
+    Task AddFriend (string friend1, string friend2);
+    Task RemoveFriend(string friend1, string friend2);
     Task DeleteProfile(string username);
 }

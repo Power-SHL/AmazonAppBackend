@@ -11,10 +11,12 @@ namespace AmazonAppBackend.Controllers;
 public class ProfileController : ControllerBase
 {
     private readonly IProfileService _profileService;
+    private readonly IFriendService _friendService;
 
-    public ProfileController(IProfileService profileService)
+    public ProfileController(IProfileService profileService, IFriendService friendService)
     {
         _profileService = profileService;
+        _friendService = friendService;
     }
 
     [HttpGet("{username}")]
@@ -99,6 +101,7 @@ public class ProfileController : ControllerBase
         }
         try
         {
+            await _friendService.DeleteFriendsAndRequests(username);
             await _profileService.DeleteProfile(username);
             return Ok($"User with username {username} deleted");
         }
