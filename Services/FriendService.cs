@@ -77,17 +77,38 @@ public class FriendService : IFriendService
     }
     public async Task DeleteFriendsAndRequests(string username)
     {
-        var friends = GetFriends(username);
-        var friendRequests = GetFriendRequests(username);
+        await Task.WhenAll(RemoveAllFriends(username), RemoveAllRequests(username));
+    }
 
-        foreach (var friend in await friends)
+    private async Task RemoveAllFriends(string username)
+    {
+        try
         {
-            await RemoveFriend(new FriendRequest(username, friend.Username));
+            var friends = await GetFriends(username);
+            foreach (var friend in friends)
+            {
+                await RemoveFriend(new FriendRequest(username, friend.Username));
+            }
         }
-
-        foreach (var request in await friendRequests)
+        catch (FriendNotFoundException)
         {
-            await RemoveFriendRequest(new FriendRequest(username, request.Receiver));
+            return;
+        }
+    }
+
+    private async Task RemoveAllRequests(string username)
+    {
+        try
+        {
+            var friendRequests = await GetFriendRequests(username);
+            foreach (var request in friendRequests)
+            {
+                await RemoveFriendRequest(new FriendRequest(username, request.Receiver));
+            }
+        }
+        catch (FriendRequestNotFoundException)
+        {
+            return;
         }
     }
 

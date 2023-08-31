@@ -96,7 +96,11 @@ public class FriendController : ControllerBase
             }
             else if (e is FriendRequestDuplicateException)
             {
-                return Conflict(e.Message);
+                return Conflict($"{request.Sender} has already sent a friend request to {request.Receiver}");
+            }
+            else if (e is FriendDuplicateException)
+            {
+                return BadRequest($"{request.Sender} and {request.Receiver} are already friends");
             }
             else if (e is FriendRequestAcceptedInsteadException)
             {
