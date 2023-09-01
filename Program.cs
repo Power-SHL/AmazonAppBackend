@@ -1,4 +1,7 @@
+using Microsoft.EntityFrameworkCore;
+using AmazonAppBackend.Data;
 using AmazonAppBackend.Services;
+using AmazonAppBackend.Storage;
 using AmazonAppBackend.Storage.FriendRequestStore;
 using AmazonAppBackend.Storage.ProfileStore;
 
@@ -11,9 +14,10 @@ builder.Services.AddSwaggerGen();
 
 // Add singletons
 builder.Services.AddSingleton<IProfileService, ProfileService>();
-builder.Services.AddSingleton<IProfileStore, InMemoryProfileStore>();
+builder.Services.AddSingleton<IProfileStore, PostgreSqlStore>();
 builder.Services.AddSingleton<IFriendService, FriendService>();
-builder.Services.AddSingleton<IFriendRequestStore, InMemoryRequestStore>();
+builder.Services.AddSingleton<IFriendRequestStore, PostgreSqlStore>();
+builder.Services.AddDbContext<DataContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("PostgreSQL")));
 
 var app = builder.Build();
 // Configure the HTTP request pipeline.

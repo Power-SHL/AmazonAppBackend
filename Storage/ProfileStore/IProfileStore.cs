@@ -9,4 +9,5 @@ public interface IProfileStore
     Task AddFriend (string friend1, string friend2);
     Task RemoveFriend(string friend1, string friend2);
     Task DeleteProfile(string username);
+    Task<List<Friend>> GetFriends (string username);
 }

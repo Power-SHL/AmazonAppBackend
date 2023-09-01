@@ -1,4 +1,5 @@
 ﻿using AmazonAppBackend.DTO;
+using AmazonAppBackend.Exceptions.ProfileExceptions;
 using AmazonAppBackend.Extensions;
 using AmazonAppBackend.Storage.FriendRequestStore;
 using AmazonAppBackend.Storage.ProfileStore;
@@ -34,6 +35,21 @@ public class ProfileService : IProfileService
 
     public async Task<Profile> UpdateProfile(Profile profile)
     {
-        return await _profileStore.UpdateProfile(profile);
+        try
+        {
+            var existingProfile = await _profileStore.GetProfileByEmail(profile.Email);
+            if (existingProfile.Username != profile.Username)
+            {
+                throw new ProfileAlreadyExistsException($"Profile {profile.Email} already in use.");
+            }
+            else
+            {
+                return await _profileStore.UpdateProfile(profile);
+            }
+        }
+        catch (ProfileNotFoundException)
+        {
+            return await _profileStore.UpdateProfile(profile);
+        }
     }
 }

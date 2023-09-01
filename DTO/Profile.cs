@@ -9,8 +9,6 @@ public record Profile
     public string FirstName { get; set; }
     public string LastName { get; set; }
 
-    public List<Friend> Friends = new();
-
     public Profile([Required] string username, [Required] string email, [Required] string password,
         [Required] string firstName, [Required] string lastName)
     {
@@ -26,5 +24,4 @@ public record Profile
         FirstName = putProfile.FirstName;
         LastName = putProfile.LastName;
     }
-
 }

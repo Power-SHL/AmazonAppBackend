@@ -3,7 +3,7 @@ namespace AmazonAppBackend.DTO;
 
 public record FriendRequest
 {
-    public string Sender {get; set; }
+    public string Sender { get; set; }
     public string Receiver { get; set; }
     public long TimeSent;
 

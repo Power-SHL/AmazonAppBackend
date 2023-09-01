@@ -17,9 +17,14 @@ public class FriendService : IFriendService
         _friendStore = friendStore;
     }
 
-    public async Task<List<FriendRequest>> GetFriendRequests(string username)
+    public async Task<List<FriendRequest>> GetSentFriendRequests(string username)
     {
-        return await _friendStore.GetFriendRequests(username);
+        return await _friendStore.GetSentFriendRequests(username);
+    }
+
+    public async Task<List<FriendRequest>> GetReceivedFriendRequests(string username)
+    {
+        return await _friendStore.GetReceivedFriendRequests(username);
     }
 
     public async Task SendFriendRequest(FriendRequest request)
@@ -27,8 +32,8 @@ public class FriendService : IFriendService
         await _profileStore.CheckProfilesExist(new List<string> { request.Sender, request.Receiver });
         try
         {
-            var friendRequests = await GetFriendRequests(request.Sender);
-            if (friendRequests.Any(r => r.Sender == request.Receiver)) // if receiver has sent a friend request to sender, accept it
+            var friendRequests = await GetReceivedFriendRequests(request.Sender);
+            if (friendRequests.Any(r => r.Sender == request.Receiver)) // if sender has received a request from receiver, accept it
             {
                 await AcceptFriendRequest(new FriendRequest(request.Receiver, request.Sender));
                 throw new FriendRequestAcceptedInsteadException($"{request.Sender} accepted the request of {request.Receiver}");
@@ -49,19 +54,12 @@ public class FriendService : IFriendService
     public async Task AcceptFriendRequest(FriendRequest request)
     {
         await _friendStore.RemoveFriendRequest(request);
-        await Task.WhenAll(_profileStore.AddFriend(request.Sender, request.Receiver),
-                            _profileStore.AddFriend(request.Receiver, request.Sender)
-                            );
+        await _profileStore.AddFriend(request.Sender, request.Receiver);
     }
 
     public async Task<List<Friend>> GetFriends(string username)
     {
-        var friends = (await _profileStore.GetProfile(username)).Friends;
-        if (friends.Count == 0)
-        {
-            throw new FriendNotFoundException($"No friends found for {username}");
-        }
-        return friends;
+        return await _profileStore.GetFriends(username);
     }
 
     public async Task RemoveFriend(FriendRequest request)
@@ -74,42 +72,6 @@ public class FriendService : IFriendService
     public async Task RemoveFriendRequest(FriendRequest request)
     {
         await _friendStore.RemoveFriendRequest(request);
-    }
-    public async Task DeleteFriendsAndRequests(string username)
-    {
-        await Task.WhenAll(RemoveAllFriends(username), RemoveAllRequests(username));
-    }
-
-    private async Task RemoveAllFriends(string username)
-    {
-        try
-        {
-            var friends = await GetFriends(username);
-            foreach (var friend in friends)
-            {
-                await RemoveFriend(new FriendRequest(username, friend.Username));
-            }
-        }
-        catch (FriendNotFoundException)
-        {
-            return;
-        }
-    }
-
-    private async Task RemoveAllRequests(string username)
-    {
-        try
-        {
-            var friendRequests = await GetFriendRequests(username);
-            foreach (var request in friendRequests)
-            {
-                await RemoveFriendRequest(new FriendRequest(username, request.Receiver));
-            }
-        }
-        catch (FriendRequestNotFoundException)
-        {
-            return;
-        }
     }
 
     private async Task CheckIfAlreadyFriends(string sender, string receiver)

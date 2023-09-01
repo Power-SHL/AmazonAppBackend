@@ -45,8 +45,8 @@ public class FriendController : ControllerBase
         }
     }
     
-    [HttpGet("requests/{username}")]
-    public async Task<ActionResult<List<Friend>>> GetFriendRequests(string username)
+    [HttpGet("requests/{username}/received")]
+    public async Task<ActionResult<List<Friend>>> GetReceivedFriendRequests(string username)
     {
         if (!username.IsValidUsername())
         {
@@ -55,7 +55,35 @@ public class FriendController : ControllerBase
 
         try
         {
-            var friendRequests = await _friendService.GetFriendRequests(username);
+            var friendRequests = await _friendService.GetReceivedFriendRequests(username);
+            return Ok(friendRequests);
+        }
+        catch (Exception e)
+        {
+            if (e is ProfileNotFoundException)
+            {
+                return NotFound($"Profile with username {username} not found.");
+            }
+            else if (e is FriendRequestNotFoundException)
+            {
+                return NotFound($"No friend requests found for user {username}");
+            }
+
+            throw;
+        }
+    }
+
+    [HttpGet("requests/{username}/sent")]
+    public async Task<ActionResult<List<Friend>>> GetSentFriendRequests(string username)
+    {
+        if (!username.IsValidUsername())
+        {
+            return BadRequest("Username format is invalid");
+        }
+
+        try
+        {
+            var friendRequests = await _friendService.GetSentFriendRequests(username);
             return Ok(friendRequests);
         }
         catch (Exception e)
