@@ -13,11 +13,11 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Add singletons
-builder.Services.AddSingleton<IProfileService, ProfileService>();
-builder.Services.AddSingleton<IProfileStore, PostgreSqlStore>();
-builder.Services.AddSingleton<IFriendService, FriendService>();
-builder.Services.AddSingleton<IFriendRequestStore, PostgreSqlStore>();
-builder.Services.AddDbContext<DataContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("PostgreSQL")));
+builder.Services.AddScoped<IProfileService, ProfileService>();
+builder.Services.AddScoped<IProfileStore, PostgreSqlStore>();
+builder.Services.AddScoped<IFriendService, FriendService>();
+builder.Services.AddScoped<IFriendRequestStore, PostgreSqlStore>();
+builder.Services.AddDbContext<DataContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("PostgreSQLConnection")));
 
 var app = builder.Build();
 // Configure the HTTP request pipeline.
