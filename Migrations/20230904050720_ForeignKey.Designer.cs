@@ -11,8 +11,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AmazonAppBackend.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230903221925_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20230904050720_ForeignKey")]
+    partial class ForeignKey
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -34,7 +34,9 @@ namespace AmazonAppBackend.Migrations
 
                     b.HasKey("Sender", "Receiver");
 
-                    b.ToTable("Friend_Requests");
+                    b.HasIndex("Receiver");
+
+                    b.ToTable("friend_requests", (string)null);
                 });
 
             modelBuilder.Entity("AmazonAppBackend.DTO.Friendship", b =>
@@ -50,7 +52,9 @@ namespace AmazonAppBackend.Migrations
 
                     b.HasKey("User1", "User2");
 
-                    b.ToTable("Friendships");
+                    b.HasIndex("User2");
+
+                    b.ToTable("Friendship", (string)null);
                 });
 
             modelBuilder.Entity("AmazonAppBackend.DTO.Profile", b =>
@@ -76,7 +80,48 @@ namespace AmazonAppBackend.Migrations
 
                     b.HasKey("Username");
 
-                    b.ToTable("Profiles");
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.ToTable("Profiles", (string)null);
+                });
+
+            modelBuilder.Entity("AmazonAppBackend.DTO.FriendRequest", b =>
+                {
+                    b.HasOne("AmazonAppBackend.DTO.Profile", "ReceiverProfile")
+                        .WithMany()
+                        .HasForeignKey("Receiver")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AmazonAppBackend.DTO.Profile", "SenderProfile")
+                        .WithMany()
+                        .HasForeignKey("Sender")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ReceiverProfile");
+
+                    b.Navigation("SenderProfile");
+                });
+
+            modelBuilder.Entity("AmazonAppBackend.DTO.Friendship", b =>
+                {
+                    b.HasOne("AmazonAppBackend.DTO.Profile", "User1Profile")
+                        .WithMany()
+                        .HasForeignKey("User1")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AmazonAppBackend.DTO.Profile", "User2Profile")
+                        .WithMany()
+                        .HasForeignKey("User2")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User1Profile");
+
+                    b.Navigation("User2Profile");
                 });
 #pragma warning restore 612, 618
         }

@@ -30,25 +30,8 @@ public class FriendService : IFriendService
     public async Task SendFriendRequest(FriendRequest request)
     {
         await _profileStore.CheckProfilesExist(new List<string> { request.Sender, request.Receiver });
-        try
-        {
-            var friendRequests = await GetReceivedFriendRequests(request.Sender);
-            if (friendRequests.Any(r => r.Sender == request.Receiver)) // if sender has received a request from receiver, accept it
-            {
-                await AcceptFriendRequest(new FriendRequest(request.Receiver, request.Sender));
-                throw new FriendRequestAcceptedInsteadException($"{request.Sender} accepted the request of {request.Receiver}");
-            }
-            else
-            {
-                await CheckIfAlreadyFriends(request.Sender, request.Receiver);
-                await _friendStore.SendFriendRequest(request);
-            }
-        }
-        catch (FriendRequestNotFoundException)
-        {
-            await CheckIfAlreadyFriends(request.Sender, request.Receiver);
-            await _friendStore.SendFriendRequest(request);
-        }
+        await CheckIfAlreadyFriends(request.Sender, request.Receiver);
+        await _friendStore.SendFriendRequest(request);
     }
 
     public async Task AcceptFriendRequest(FriendRequest request)

@@ -98,12 +98,28 @@ public class PostgreSqlStore : IProfileStore, IFriendRequestStore
     {
         try
         {
-            _context.Friend_Requests.Add(request);
-            await _context.SaveChangesAsync();
+            var friendRequest = await _context.Friend_Requests
+                .FirstOrDefaultAsync(r => r.Sender == request.Receiver && r.Receiver == request.Sender);
+            if (friendRequest != null)
+            {
+                Friendship friendship = string.Compare(request.Sender, request.Receiver, StringComparison.OrdinalIgnoreCase) < 0 ?
+                    new Friendship(request.Sender, request.Receiver) : new Friendship(request.Receiver, request.Sender);
+
+                await _context.Friendships.AddAsync(friendship);
+                _context.Friend_Requests.Remove(friendRequest);
+                await _context.SaveChangesAsync();
+                throw new FriendRequestAcceptedInsteadException($"{request.Sender} and {request.Receiver} are now friends");
+
+            }
+            else
+            {
+                _context.Friend_Requests.Add(request);
+                await _context.SaveChangesAsync();
+            }
         }
         catch (DbUpdateException)
         {
-            throw new FriendDuplicateException($"Friend request from {request.Sender} to {request.Receiver} already exists.");
+            throw new FriendRequestDuplicateException($"Friend request from {request.Sender} to {request.Receiver} already exists.");
         }
     }
 
