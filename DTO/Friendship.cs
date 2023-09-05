@@ -10,8 +10,8 @@ public record Friendship
 
     public Friendship([Required] string user1, [Required] string user2)
     {
-        User1 = user1;
-        User2 = user2;
+        User1 = user1.ToLower();
+        User2 = user2.ToLower();
         TimeAdded = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
     }
 }

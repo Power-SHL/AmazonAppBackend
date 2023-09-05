@@ -54,17 +54,24 @@ public class PostgreSqlStore : IProfileStore, IFriendRequestStore
         var profile = await _context.Profiles.FindAsync(username) 
                       ?? throw new ProfileNotFoundException($"Profile {username} not found.");
         _context.Profiles.Remove(profile);
-        await _context.SaveChangesAsync();
+        if (await _context.SaveChangesAsync() == 0)
+        {
+            throw new ProfileNotFoundException($"User {username} not found");
+        }
     }
 
     public async Task<List<Friend>> GetFriends(string username)
     {
         var friends = await _context.Friendships
             .Where(friendship => friendship.User1 == username || friendship.User2 == username)
-            .Select(friendship => new Friend(friendship.User1 == username ? friendship.User2 : friendship.User1, friendship.TimeAdded))
+            .OrderByDescending(friendship => friendship.TimeAdded)
+            .Select(friendship => new Friend(
+                                friendship.User1 == username ? friendship.User2 : friendship.User1,
+                                friendship.TimeAdded))
             .ToListAsync();
 
-        return friends ?? throw new FriendRequestNotFoundException();
+
+        return friends.Any() ? friends : throw new FriendNotFoundException($"No friends found for {username}");
     }
 
     public async Task AddFriend(string friend1, string friend2)
@@ -136,17 +143,19 @@ public class PostgreSqlStore : IProfileStore, IFriendRequestStore
     {
         var friendRequests = await _context.Friend_Requests
             .Where(request => request.Receiver == username)
+            .OrderByDescending(request => request.TimeAdded)
             .ToListAsync();
 
-        return friendRequests ?? throw new FriendRequestNotFoundException($"No friend requests sent to {username}");
+        return friendRequests.Any() ? friendRequests : throw new FriendRequestNotFoundException($"No friend requests sent to {username}");
     }
 
     public async Task<List<FriendRequest>> GetSentFriendRequests(string username)
     {
         var friendRequests = await _context.Friend_Requests
             .Where(request => request.Sender == username)
+            .OrderByDescending(request => request.TimeAdded)
             .ToListAsync();
 
-        return friendRequests ?? throw new FriendRequestNotFoundException($"No friend requests sent by {username}");
+        return friendRequests.Any() ? friendRequests : throw new FriendRequestNotFoundException($"No friend requests sent by {username}");
     }
 }

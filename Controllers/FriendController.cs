@@ -102,9 +102,9 @@ public class FriendController : ControllerBase
     }
 
     [HttpPost("send")]
-    public async Task<ActionResult> SendFriendRequest(FriendRequest request)
+    public async Task<ActionResult> SendFriendRequest(CreateFriendRequest createRequest)
     {
-
+        FriendRequest request = new(createRequest);
         try
         {
             request.ValidateFriendRequest();

@@ -6,7 +6,7 @@ public record Friend
 
     public Friend(string username, long timeAdded)
     {
-        Username = username;
+        Username = username.ToLower();
         TimeAdded = timeAdded;
     }
 }

@@ -47,9 +47,7 @@ public class FriendService : IFriendService
 
     public async Task RemoveFriend(FriendRequest request)
     {
-        await Task.WhenAll(_profileStore.RemoveFriend(request.Sender, request.Receiver),
-                            _profileStore.RemoveFriend(request.Receiver, request.Sender)
-                            );
+        await _profileStore.RemoveFriend(request.Sender, request.Receiver);
     }
 
     public async Task RemoveFriendRequest(FriendRequest request)

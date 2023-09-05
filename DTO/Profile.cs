@@ -12,8 +12,8 @@ public record Profile
     public Profile([Required] string username, [Required] string email, [Required] string password,
         [Required] string firstName, [Required] string lastName)
     {
-        Username = username;
-        Email = email;
+        Username = username.ToLower();
+        Email = email.ToLower();
         Password = password;
         FirstName = firstName;
         LastName = lastName;
@@ -21,7 +21,7 @@ public record Profile
 
     public void SetTo(PutProfile putProfile)
     {
-        FirstName = putProfile.FirstName;
-        LastName = putProfile.LastName;
+        FirstName = putProfile.FirstName.ToLower();
+        LastName = putProfile.LastName.ToLower();
     }
 }

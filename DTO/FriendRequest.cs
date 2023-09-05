@@ -1,19 +1,29 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
+
 namespace AmazonAppBackend.DTO;
 
 public record FriendRequest
 {
     public string Sender { get; set; }
     public string Receiver { get; set; }
-    public long TimeAdded { get; }
+    public long TimeAdded { get; set; }
 
     public Profile SenderProfile;
     public Profile ReceiverProfile;
 
-    public FriendRequest([Required] string sender, [Required] string receiver)
+    [JsonConstructor]
+    public FriendRequest(string sender, string receiver)
     {
-        Sender = sender;
-        Receiver = receiver;
+        Sender = sender.ToLower();
+        Receiver = receiver.ToLower();
+        TimeAdded = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+    }
+
+    public FriendRequest(CreateFriendRequest request)
+    {
+        Sender = request.Sender.ToLower();
+        Receiver = request.Receiver.ToLower();
         TimeAdded = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
     }
 }
