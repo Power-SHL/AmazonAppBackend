@@ -20,6 +20,7 @@ public class ProfileController : ControllerBase
     [HttpGet("{username}")]
     public async Task<ActionResult<Profile>> GetProfile(string username)
     {
+        username = username.ToLower();
         if (!username.IsValidUsername())
         {
             return BadRequest("Username format is invalid");
@@ -67,6 +68,7 @@ public class ProfileController : ControllerBase
     [HttpPut("{username}")]
     public async Task<ActionResult> UpdateProfile(string username, PutProfile partProfile)
     {
+        username = username.ToLower();
         try
         {
             partProfile.ValidatePutProfile();
@@ -93,6 +95,7 @@ public class ProfileController : ControllerBase
     [HttpDelete("{username}")]
     public async Task<ActionResult> DeleteProfile(string username)
     {
+        username = username.ToLower();
         if (!username.IsValidUsername())
         {
             return BadRequest("Username format is invalid");

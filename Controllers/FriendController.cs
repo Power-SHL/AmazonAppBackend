@@ -20,6 +20,7 @@ public class FriendController : ControllerBase
     [HttpGet("{username}")]
     public async Task<ActionResult<List<Friend>>> GetFriends(string username)
     {
+        username = username.ToLower();
         if (!username.IsValidUsername())
         {
             return BadRequest("Username format is invalid");
@@ -48,6 +49,7 @@ public class FriendController : ControllerBase
     [HttpGet("requests/{username}/received")]
     public async Task<ActionResult<List<Friend>>> GetReceivedFriendRequests(string username)
     {
+        username = username.ToLower();
         if (!username.IsValidUsername())
         {
             return BadRequest("Username format is invalid");
@@ -76,6 +78,7 @@ public class FriendController : ControllerBase
     [HttpGet("requests/{username}/sent")]
     public async Task<ActionResult<List<Friend>>> GetSentFriendRequests(string username)
     {
+        username = username.ToLower();
         if (!username.IsValidUsername())
         {
             return BadRequest("Username format is invalid");
