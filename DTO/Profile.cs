@@ -9,13 +9,11 @@ public record Profile
     public string FirstName { get; set; }
     public string LastName { get; set; }
 
-    public List<Friend> Friends = new();
-
     public Profile([Required] string username, [Required] string email, [Required] string password,
         [Required] string firstName, [Required] string lastName)
     {
-        Username = username;
-        Email = email;
+        Username = username.ToLower();
+        Email = email.ToLower();
         Password = password;
         FirstName = firstName;
         LastName = lastName;
@@ -23,8 +21,7 @@ public record Profile
 
     public void SetTo(PutProfile putProfile)
     {
-        FirstName = putProfile.FirstName;
-        LastName = putProfile.LastName;
+        FirstName = putProfile.FirstName.ToLower();
+        LastName = putProfile.LastName.ToLower();
     }
-
 }

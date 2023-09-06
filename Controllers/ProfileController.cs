@@ -11,17 +11,16 @@ namespace AmazonAppBackend.Controllers;
 public class ProfileController : ControllerBase
 {
     private readonly IProfileService _profileService;
-    private readonly IFriendService _friendService;
 
-    public ProfileController(IProfileService profileService, IFriendService friendService)
+    public ProfileController(IProfileService profileService)
     {
         _profileService = profileService;
-        _friendService = friendService;
     }
 
     [HttpGet("{username}")]
     public async Task<ActionResult<Profile>> GetProfile(string username)
     {
+        username = username.ToLower();
         if (!username.IsValidUsername())
         {
             return BadRequest("Username format is invalid");
@@ -69,6 +68,7 @@ public class ProfileController : ControllerBase
     [HttpPut("{username}")]
     public async Task<ActionResult> UpdateProfile(string username, PutProfile partProfile)
     {
+        username = username.ToLower();
         try
         {
             partProfile.ValidatePutProfile();
@@ -95,13 +95,13 @@ public class ProfileController : ControllerBase
     [HttpDelete("{username}")]
     public async Task<ActionResult> DeleteProfile(string username)
     {
+        username = username.ToLower();
         if (!username.IsValidUsername())
         {
             return BadRequest("Username format is invalid");
         }
         try
         {
-            await _friendService.DeleteFriendsAndRequests(username);
             await _profileService.DeleteProfile(username);
             return Ok($"User with username {username} deleted");
         }

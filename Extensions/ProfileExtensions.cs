@@ -27,27 +27,23 @@ public static class ProfileExtensions
     }
     public static async Task CheckProfilesExist(this IProfileStore profileStore, List<string> usernames)
     {
-        List<Task> tasks = new();
         StringBuilder errorMessage = new();
 
         foreach (string username in usernames)
         {
-            tasks.Add(Task.Run(async () =>
+            try
             {
-                try
-                {
-                    await profileStore.GetProfile(username);
-                }
-                catch
-                {
-                    errorMessage.Append(username + ", ");
-                }
-            }));
+                await profileStore.GetProfile(username);
+            }
+            catch (ProfileNotFoundException)
+            {
+                errorMessage.Append($"{username}, ");
+            }
+            
         }
-        await Task.WhenAll(tasks);
         if (errorMessage.Length > 0)
         {
-            throw new ProfileNotFoundException($"Profile(s) {errorMessage} do not exist.");
+            throw new ProfileNotFoundException(errorMessage + $" users not found");
         }
     }
 }

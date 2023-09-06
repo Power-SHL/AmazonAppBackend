@@ -3,4 +3,5 @@
 public class FriendRequestNotFoundException : Exception
 {
     public FriendRequestNotFoundException(string message) : base(message) {}
+    public FriendRequestNotFoundException() : base() {}
 }

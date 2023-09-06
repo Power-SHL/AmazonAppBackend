@@ -1,4 +1,14 @@
 ﻿using System.ComponentModel.DataAnnotations;
 namespace AmazonAppBackend.DTO;
 
-public record PutProfile([Required] string FirstName, [Required] string LastName);
+public record PutProfile
+{
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
+
+    public PutProfile([Required] string firstname, [Required] string lastname)
+    {
+        FirstName = firstname.ToLower();
+        LastName = lastname.ToLower();
+    }
+}

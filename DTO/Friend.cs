@@ -1,15 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace AmazonAppBackend.DTO;
-
+﻿namespace AmazonAppBackend.DTO;
 public record Friend
 {
     public string Username { get; set; }
-    public long TimeAdded;
+    public long TimeAdded { get; set; }
 
-    public Friend([Required] string username)
+    public Friend(string username, long timeAdded)
     {
-        Username = username;
-        TimeAdded = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        Username = username.ToLower();
+        TimeAdded = timeAdded;
     }
 }

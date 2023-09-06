@@ -51,7 +51,7 @@ public static class SecurityExtension
         try
         {
             return Regex.IsMatch(password,
-                @"^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$",
+                @"^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,30}$",
                 RegexOptions.None, TimeSpan.FromMilliseconds(250));
         }
         catch (RegexMatchTimeoutException)
