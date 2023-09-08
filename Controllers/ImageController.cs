@@ -22,6 +22,10 @@ public class ImageController : ControllerBase
     public async Task<ActionResult> UploadImage(IFormFile image, string username)
     {
         username = username.ToLower();
+        if (!username.IsValidUsername())
+        {
+            return BadRequest("Username format is invalid");
+        }
         var type = image.ContentType;
         if (type != "image/png" && type != "image/jpeg")
         {
@@ -51,6 +55,10 @@ public class ImageController : ControllerBase
     public async Task<ActionResult> DownloadImage(string username)
     {
         username = username.ToLower();
+        if (!username.IsValidUsername())
+        {
+            return BadRequest("Username format is invalid");
+        }
         try
         {
             var imageBytes = await _imageService.DownloadImage(username);
@@ -70,6 +78,10 @@ public class ImageController : ControllerBase
     public async Task<ActionResult> DeleteImage(string username)
     {
         username = username.ToLower();
+        if (!username.IsValidUsername())
+        {
+            return BadRequest("Username format is invalid");
+        }
         try
         {
             await _imageService.DeleteImage(username);

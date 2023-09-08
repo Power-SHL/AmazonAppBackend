@@ -1,6 +1,7 @@
 ﻿using Amazon.S3;
 using Amazon.S3.Model;
 using AmazonAppBackend.Exceptions.ImageExceptions;
+using System.Net;
 
 namespace AmazonAppBackend.Storage.ImageStore;
 
@@ -47,12 +48,25 @@ public class S3BucketStore : IImageStore
 
     public async Task DeleteImage(string username)
     {
-        //TODO: Add check for image not found (use Get?) since DeleteObjectAsync doesn't throw an exception
-        var request = new DeleteObjectRequest()
+        try
         {
-            BucketName = _bucketName,
-            Key = username
-        };
-        await _s3Client.DeleteObjectAsync(request);
+            var checkRequest = new GetObjectMetadataRequest
+            {
+                BucketName = _bucketName,
+                Key = username
+            };
+            var deleteRequest = new DeleteObjectRequest
+            {
+                BucketName = _bucketName,
+                Key = username
+            };
+
+            await Task.WhenAll(_s3Client.GetObjectMetadataAsync(checkRequest),
+                            _s3Client.DeleteObjectAsync(deleteRequest));
+        }
+        catch (AmazonS3Exception e) when (e.StatusCode == HttpStatusCode.NotFound)
+        {
+            throw new ImageNotFoundException($"No image found with key {username}");
+        }
     }
 }

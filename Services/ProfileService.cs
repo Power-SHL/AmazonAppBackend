@@ -26,7 +26,11 @@ public class ProfileService : IProfileService
 
     public async Task DeleteProfile(string username)
     {
-        await Task.WhenAll(_profileStore.DeleteProfile(username), _imageService.DeleteImage(username));
+        try
+        {
+            await Task.WhenAll(_profileStore.DeleteProfile(username), _imageService.DeleteImage(username));
+        }
+        catch (ImageNotFoundException) {}
     }
 
     public async Task<Profile> GetProfile(string username)
