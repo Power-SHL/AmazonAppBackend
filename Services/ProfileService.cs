@@ -18,7 +18,7 @@ public class ProfileService : IProfileService
         _profileStore = profileStore;
         _imageService = imageService;
     }
-    public async Task<Profile> CreateProfile(Profile profile)
+    public async Task<UnverifiedProfile> CreateProfile(UnverifiedProfile profile)
     {
         await _profileStore.CheckUniqueEmail(profile.Email);
         return await _profileStore.CreateProfile(profile);
@@ -38,6 +38,21 @@ public class ProfileService : IProfileService
         return await _profileStore.GetProfile(username);
     }
 
+    public async Task<Profile> VerifyProfile(string username, string verificationCode)
+    {
+        var profile = await _profileStore.GetUnverifiedProfile(username);
+        if (profile.VerificationCode == verificationCode)
+        {
+            return await _profileStore.VerifyProfile(username);
+        }
+        throw new ProfileVerificationException("Verification code is incorrect");
+    }
+
+    public async Task<UnverifiedProfile> GetUnverifiedProfile(string username)
+    {
+        return await _profileStore.GetUnverifiedProfile(username);
+    }
+
     public async Task<Profile> UpdateProfile(Profile profile)
     {
         try
@@ -45,7 +60,7 @@ public class ProfileService : IProfileService
             var existingProfile = await _profileStore.GetProfileByEmail(profile.Email);
             if (existingProfile.Username != profile.Username)
             {
-                throw new ProfileAlreadyExistsException($"Profile {profile.Email} already in use.");
+                throw new ProfileDuplicateException($"Profile {profile.Email} already in use.");
             }
             else
             {

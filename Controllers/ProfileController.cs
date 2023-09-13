@@ -47,20 +47,57 @@ public class ProfileController : ControllerBase
         {
             profile.ValidateProfile();
             profile.Password = profile.Password.BCryptHash();
-            await _profileService.CreateProfile(profile);
+            UnverifiedProfile unverifiedProfile = new (profile, Guid.NewGuid().ToString("N"));
+            await _profileService.CreateProfile(unverifiedProfile);
 
             return CreatedAtAction(nameof(GetProfile), new { username = profile.Username }, profile);
         }
         catch (Exception e)
         {
-            if (e is ProfileAlreadyExistsException)
+            if (e is ProfileDuplicateException)
             {
                 return Conflict("Cannot create profile.\n" + e.Message);
             }
-            else if (e is ProfileInvalidException)
+            if (e is ProfileInvalidException)
             {
                 return BadRequest(e.Message);
             }
+            throw;
+        }
+    }
+
+    [HttpPost("verify")]
+    public async Task<ActionResult<Profile>> VerifyProfile(string username, string verificationCode)
+    {
+        username = username.ToLower();
+        if (!username.IsValidUsername())
+        {
+            return BadRequest("Username format is invalid");
+        }
+
+        try
+        {
+            var profile = await _profileService.VerifyProfile(username, verificationCode);
+
+            return CreatedAtAction(nameof(GetProfile), new { username = profile.Username }, profile);
+        }
+        catch (Exception e)
+        {
+            if (e is ProfileDuplicateException)
+            {
+                return Conflict("Cannot create profile.\n" + e.Message);
+            }
+
+            if (e is ProfileInvalidException)
+            {
+                return BadRequest(e.Message);
+            }
+
+            if (e is ProfileVerificationException)
+            {
+                return BadRequest("Incorrect verification code.");
+            }
+
             throw;
         }
     }
