@@ -11,10 +11,12 @@ namespace AmazonAppBackend.Controllers;
 public class ProfileController : ControllerBase
 {
     private readonly IProfileService _profileService;
+    private readonly IEmailService _emailService;
 
-    public ProfileController(IProfileService profileService)
+    public ProfileController(IProfileService profileService, IEmailService emailService)
     {
         _profileService = profileService;
+        _emailService = emailService;
     }
 
     [HttpGet("{username}")]
@@ -49,6 +51,7 @@ public class ProfileController : ControllerBase
             profile.Password = profile.Password.BCryptHash();
             UnverifiedProfile unverifiedProfile = new (profile, Guid.NewGuid().ToString("N"));
             await _profileService.CreateProfile(unverifiedProfile);
+            await _emailService.SendEmail(profile);
 
             return CreatedAtAction(nameof(GetProfile), new { username = profile.Username }, profile);
         }

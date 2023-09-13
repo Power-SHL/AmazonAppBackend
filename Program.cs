@@ -38,11 +38,18 @@ builder.Services.AddScoped(sp =>
     };
     return new AmazonS3Client(credentials, s3Config);
 });
-
 builder.Services.AddScoped(sp =>
 {
     var s3BucketOptions = sp.GetRequiredService<IOptions<S3BucketSettings>>().Value;
     return s3BucketOptions.BucketName;
+});
+
+builder.Services.Configure<GmailSettings>(builder.Configuration.GetSection("GmailSettings"));
+builder.Services.AddScoped<IEmailService, GmailService>();
+builder.Services.AddScoped(sp =>
+{
+    var gmailSettings = sp.GetRequiredService<IOptions<GmailSettings>>().Value;
+    return gmailSettings;
 });
 
 var app = builder.Build();
