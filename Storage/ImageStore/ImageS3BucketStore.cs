@@ -2,18 +2,19 @@
 using Amazon.S3.Model;
 using AmazonAppBackend.Exceptions.ImageExceptions;
 using System.Net;
+using AmazonAppBackend.Configuration;
 
 namespace AmazonAppBackend.Storage.ImageStore;
 
-public class S3BucketStore : IImageStore
+public class ImageS3BucketStore : IImageStore
 {
     private readonly string _bucketName;
     private readonly AmazonS3Client _s3Client;
 
-    public S3BucketStore(AmazonS3Client s3Client, string bucketName)
+    public ImageS3BucketStore(ImageS3BucketConfig config)
     {
-        _s3Client = s3Client;
-        _bucketName = bucketName;
+        _s3Client = config.S3Client;
+        _bucketName = config.BucketName;
     }
 
     public async Task UploadImage(IFormFile image, string username)

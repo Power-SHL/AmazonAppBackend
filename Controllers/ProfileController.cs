@@ -51,7 +51,7 @@ public class ProfileController : ControllerBase
             profile.Password = profile.Password.BCryptHash();
             UnverifiedProfile unverifiedProfile = new (profile, Guid.NewGuid().ToString("N"));
             await _profileService.CreateProfile(unverifiedProfile);
-            await _emailService.SendEmail(profile);
+            await _emailService.SendEmail(unverifiedProfile);
 
             return CreatedAtAction(nameof(GetProfile), new { username = profile.Username }, profile);
         }

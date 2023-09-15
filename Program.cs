@@ -10,6 +10,7 @@ using Amazon.S3;
 using AmazonAppBackend.Configuration;
 using Microsoft.Extensions.Options;
 using Amazon.Runtime;
+using AmazonAppBackend.Storage.EmailStore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,29 +27,37 @@ builder.Services.AddScoped<IFriendRequestStore, PostgreSqlStore>();
 builder.Services.AddDbContext<DataContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("PostgreSQLConnection")));
 
 builder.Services.AddScoped<IImageService, ImageService>();
-builder.Services.Configure<S3BucketSettings>(builder.Configuration.GetSection("AmazonS3Config"));
-builder.Services.AddScoped<IImageStore, S3BucketStore>();
+builder.Services.Configure<ProfilePicS3Settings>(builder.Configuration.GetSection("S3ProfilePicConfig"));
+builder.Services.AddScoped<IImageStore, ImageS3BucketStore>();
 builder.Services.AddScoped(sp =>
 {
-    var s3BucketOptions = sp.GetRequiredService<IOptions<S3BucketSettings>>().Value;
+    var s3BucketOptions = sp.GetRequiredService<IOptions<ProfilePicS3Settings>>().Value;
     var credentials = new BasicAWSCredentials(s3BucketOptions.AccessKey, s3BucketOptions.SecretKey);
     var s3Config = new AmazonS3Config()
     {
         RegionEndpoint = RegionEndpoint.GetBySystemName(s3BucketOptions.RegionEndpoint)
     };
-    return new AmazonS3Client(credentials, s3Config);
-});
-builder.Services.AddScoped(sp =>
-{
-    var s3BucketOptions = sp.GetRequiredService<IOptions<S3BucketSettings>>().Value;
-    return s3BucketOptions.BucketName;
+    return new ImageS3BucketConfig(new AmazonS3Client(credentials, s3Config), s3BucketOptions.BucketName);
 });
 
-builder.Services.Configure<GmailSettings>(builder.Configuration.GetSection("GmailSettings"));
-builder.Services.AddScoped<IEmailService, GmailService>();
+builder.Services.Configure<EmailContentS3BucketSettings>(builder.Configuration.GetSection("S3EmailContentConfig"));
+builder.Services.AddScoped<IEmailService, MailKitService>();
+builder.Services.AddScoped<IEmailStore, S3BucketEmailStore>();
 builder.Services.AddScoped(sp =>
 {
-    var gmailSettings = sp.GetRequiredService<IOptions<GmailSettings>>().Value;
+    var s3BucketOptions = sp.GetRequiredService<IOptions<EmailContentS3BucketSettings>>().Value;
+    var credentials = new BasicAWSCredentials(s3BucketOptions.AccessKey, s3BucketOptions.SecretKey);
+    var s3Config = new AmazonS3Config()
+    {
+        RegionEndpoint = RegionEndpoint.GetBySystemName(s3BucketOptions.RegionEndpoint)
+    };
+    return new EmailContentS3BucketConfig(new AmazonS3Client(credentials, s3Config), s3BucketOptions.BucketName);
+});
+
+builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("GmailSettings"));
+builder.Services.AddScoped(sp =>
+{
+    var gmailSettings = sp.GetRequiredService<IOptions<MailSettings>>().Value;
     return gmailSettings;
 });
 

@@ -1,6 +1,5 @@
 ﻿namespace AmazonAppBackend.Configuration;
-
-public class S3BucketSettings
+public class ProfilePicS3Settings
 {
     public string AccessKey { get; set; }
     public string SecretKey { get; set; }
