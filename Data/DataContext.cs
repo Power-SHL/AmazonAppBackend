@@ -10,6 +10,8 @@ namespace AmazonAppBackend.Data
         public DbSet<FriendRequest> FriendRequests { get; set; }
         public DbSet<Friendship> Friendships { get; set; }
 
+        public DbSet<ResetPasswordRequest> ResetPasswordRequests { get; set; }
+
         public DataContext(DbContextOptions<DataContext> options)
             : base(options)
         {
@@ -24,6 +26,7 @@ namespace AmazonAppBackend.Data
             modelBuilder.Entity<FriendRequest>().ToTable("FriendRequests");
             modelBuilder.Entity<Friendship>().ToTable("Friendships");
             modelBuilder.Entity<UnverifiedProfile>().ToTable("UnverifiedProfiles");
+            modelBuilder.Entity<ResetPasswordRequest>().ToTable("ResetPasswordRequests");
 
             // Primary and unique keys
             modelBuilder.Entity<Profile>().HasKey(p => p.Username);
@@ -34,6 +37,9 @@ namespace AmazonAppBackend.Data
 
             modelBuilder.Entity<UnverifiedProfile>().HasKey(up => up.Username);
             modelBuilder.Entity<UnverifiedProfile>().HasIndex(p => p.Email).IsUnique();
+
+            modelBuilder.Entity<ResetPasswordRequest>().HasKey(rpr => rpr.Username);
+            modelBuilder.Entity<ResetPasswordRequest>().HasIndex(rpr => rpr.Code).IsUnique();
 
             // Define foreign key relationships
             modelBuilder.Entity<FriendRequest>()
@@ -58,6 +64,12 @@ namespace AmazonAppBackend.Data
                 .HasOne(fs => fs.User2Profile)
                 .WithMany()
                 .HasForeignKey(fs => fs.User2)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ResetPasswordRequest>()
+                .HasOne(rpr => rpr.User)
+                .WithMany()
+                .HasForeignKey(rpr => rpr.Username)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }

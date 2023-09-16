@@ -1,4 +1,4 @@
-﻿namespace AmazonAppBackend.Services;
+﻿namespace AmazonAppBackend.Services.ImageService;
 
 public interface IImageService
 {

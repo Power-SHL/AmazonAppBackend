@@ -1,5 +1,6 @@
 ﻿using AmazonAppBackend.DTO;
-namespace AmazonAppBackend.Services;
+
+namespace AmazonAppBackend.Services.FriendService;
 public interface IFriendService
 {
     Task SendFriendRequest(FriendRequest request);

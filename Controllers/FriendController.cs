@@ -2,8 +2,8 @@
 using AmazonAppBackend.Exceptions.ProfileExceptions;
 using AmazonAppBackend.DTO;
 using AmazonAppBackend.Extensions;
-using AmazonAppBackend.Services;
 using AmazonAppBackend.Exceptions.FriendExceptions;
+using AmazonAppBackend.Services.FriendService;
 
 namespace AmazonAppBackend.Controllers;
 

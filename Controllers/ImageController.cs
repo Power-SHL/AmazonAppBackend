@@ -2,7 +2,7 @@
 using AmazonAppBackend.Exceptions.ImageExceptions;
 using AmazonAppBackend.Exceptions.ProfileExceptions;
 using AmazonAppBackend.Extensions;
-using AmazonAppBackend.Services;
+using AmazonAppBackend.Services.ImageService;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AmazonAppBackend.Controllers;

@@ -2,11 +2,10 @@
 using AmazonAppBackend.Exceptions.ImageExceptions;
 using AmazonAppBackend.Exceptions.ProfileExceptions;
 using AmazonAppBackend.Extensions;
-using AmazonAppBackend.Storage.FriendRequestStore;
-using AmazonAppBackend.Storage.ImageStore;
+using AmazonAppBackend.Services.ImageService;
 using AmazonAppBackend.Storage.ProfileStore;
 
-namespace AmazonAppBackend.Services;
+namespace AmazonAppBackend.Services.ProfileService;
 
 public class ProfileService : IProfileService
 {
@@ -30,7 +29,7 @@ public class ProfileService : IProfileService
         {
             await Task.WhenAll(_profileStore.DeleteProfile(username), _imageService.DeleteImage(username));
         }
-        catch (ImageNotFoundException) {}
+        catch (ImageNotFoundException) { }
     }
 
     public async Task<Profile> GetProfile(string username)
@@ -71,5 +70,11 @@ public class ProfileService : IProfileService
         {
             return await _profileStore.UpdateProfile(profile);
         }
+    }
+
+    public async Task ResetPassword(ResetPasswordRequest request)
+    {
+        await _profileStore.CheckProfilesExist(new List<string>(){request.Username});
+        await _profileStore.AddResetPasswordRequest(request);
     }
 }

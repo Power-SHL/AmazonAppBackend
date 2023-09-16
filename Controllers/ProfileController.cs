@@ -2,7 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using AmazonAppBackend.Exceptions.ProfileExceptions;
 using AmazonAppBackend.DTO;
 using AmazonAppBackend.Extensions;
-using AmazonAppBackend.Services;
+using AmazonAppBackend.Services.EmailService;
+using AmazonAppBackend.Services.ProfileService;
 
 namespace AmazonAppBackend.Controllers;
 
@@ -51,7 +52,7 @@ public class ProfileController : ControllerBase
             profile.Password = profile.Password.BCryptHash();
             UnverifiedProfile unverifiedProfile = new (profile, Guid.NewGuid().ToString("N"));
             await _profileService.CreateProfile(unverifiedProfile);
-            await _emailService.SendEmail(unverifiedProfile);
+            await _emailService.VerifyEmail(unverifiedProfile);
 
             return CreatedAtAction(nameof(GetProfile), new { username = profile.Username }, profile);
         }
@@ -105,6 +106,32 @@ public class ProfileController : ControllerBase
         }
     }
 
+    [HttpGet("verify/{username}")]
+    public async Task<ActionResult<Profile>> ResendVerificationEmail(string username)
+    {
+        username = username.ToLower();
+        if (!username.IsValidUsername())
+        {
+            return BadRequest("Username format is invalid");
+        }
+
+        try
+        {
+            var profile = await _profileService.GetUnverifiedProfile(username);
+            await _emailService.VerifyEmail(profile);
+
+            return Ok($"Email successfully sent to {username}.");
+        }
+        catch (Exception e)
+        {
+            if (e is ProfileNotFoundException)
+            {
+                return NotFound($"User {username} not found.");
+            }
+            throw;
+        }
+    }
+
     [HttpPut("{username}")]
     public async Task<ActionResult> UpdateProfile(string username, PutProfile partProfile)
     {
@@ -150,6 +177,36 @@ public class ProfileController : ControllerBase
             if (e is ProfileNotFoundException)
             {
                 return NotFound($"User with username {username} not found");
+            }
+            throw;
+        }
+    }
+
+    [HttpPost("{username}/reset")]
+    public async Task<ActionResult> ResetPassword(string username)
+    {
+        username = username.ToLower();
+        if (!username.IsValidUsername())
+        {
+            return BadRequest("Username format is invalid");
+        }
+        try
+        {
+            var resetRequest = new ResetPasswordRequest(username, Guid.NewGuid().ToString("N"));
+            await _profileService.ResetPassword(resetRequest);
+            await _emailService.ResetPasswordEmail(resetRequest);
+            return Ok($"Password reset request sent to {resetRequest.Username}");
+        }
+        catch (Exception e)
+        {
+            if (e is ProfileNotFoundException)
+            {
+                return NotFound($"User with username {username} not found");
+            }
+
+            if (e is ResetPasswordRequestDuplicateException)
+            {
+                return Conflict($"Password reset request already sent to {username}");
             }
             throw;
         }

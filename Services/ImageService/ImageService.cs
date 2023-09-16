@@ -2,7 +2,7 @@
 using AmazonAppBackend.Storage.ImageStore;
 using AmazonAppBackend.Storage.ProfileStore;
 
-namespace AmazonAppBackend.Services;
+namespace AmazonAppBackend.Services.ImageService;
 
 public class ImageService : IImageService
 {

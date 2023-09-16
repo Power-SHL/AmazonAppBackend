@@ -182,4 +182,18 @@ public class PostgreSqlStore : IProfileStore, IFriendRequestStore
 
         return friendRequests.Any() ? friendRequests : throw new FriendRequestNotFoundException($"No friend requests sent by {username}");
     }
+
+    public async Task AddResetPasswordRequest(ResetPasswordRequest request)
+    {
+        try
+        {
+            _context.ResetPasswordRequests.Add(request);
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateException)
+        {
+            throw new ResetPasswordRequestDuplicateException($"Reset password request for {request.Username} already exists");
+        }
+    }
+    
 }

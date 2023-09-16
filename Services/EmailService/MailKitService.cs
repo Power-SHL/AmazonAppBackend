@@ -1,11 +1,12 @@
-﻿using AmazonAppBackend.Configuration;
+﻿using AmazonAppBackend.Configuration.Settings;
 using AmazonAppBackend.DTO;
 using AmazonAppBackend.Storage.EmailStore;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using MimeKit;
+using Org.BouncyCastle.Cms;
 
-namespace AmazonAppBackend.Services;
+namespace AmazonAppBackend.Services.EmailService;
 
 public class MailKitService : IEmailService
 {
@@ -14,6 +15,7 @@ public class MailKitService : IEmailService
     private readonly string _smtpServer;
     private readonly IEmailStore _emailStore;
 
+
     public MailKitService(MailSettings settings, IEmailStore emailStore)
     {
         _senderEmail = settings.SenderEmail;
@@ -21,7 +23,7 @@ public class MailKitService : IEmailService
         _smtpServer = settings.SmtpServer;
         _emailStore = emailStore;
     }
-    public async Task SendEmail(UnverifiedProfile recipient)
+    public async Task VerifyEmail(UnverifiedProfile recipient)
     {
         var message = new MimeMessage();
         message.From.Add(new MailboxAddress("StreamIt", _senderEmail));
@@ -38,7 +40,32 @@ public class MailKitService : IEmailService
         };
 
         message.Body = builder.ToMessageBody();
-        using var client = new SmtpClient() ;
+        await SendEmail(message);
+    }
+
+    public async Task ResetPasswordEmail(ResetPasswordRequest request)
+    {
+        var message = new MimeMessage();
+        message.From.Add(new MailboxAddress("StreamIt", _senderEmail));
+        message.To.Add(new MailboxAddress(request.Username, request.User.Email));
+        message.Subject = "Reset Password";
+
+        string content = await _emailStore.GetEmailContent("ResetPassword");
+        content = content.Replace("{{recipient_username}}", request.Username);
+        content = content.Replace("{{reset_code}}", request.Code);
+
+        var builder = new BodyBuilder
+        {
+            HtmlBody = content
+        };
+
+        message.Body = builder.ToMessageBody();
+        await SendEmail(message);
+    }
+
+    private async Task SendEmail(MimeMessage message)
+    {
+        using var client = new SmtpClient();
         await client.ConnectAsync(_smtpServer, 587, SecureSocketOptions.StartTls);
         await client.AuthenticateAsync(_senderEmail, _senderPassword);
         await client.SendAsync(message);

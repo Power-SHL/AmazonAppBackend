@@ -1,7 +1,6 @@
 using Amazon;
 using Microsoft.EntityFrameworkCore;
 using AmazonAppBackend.Data;
-using AmazonAppBackend.Services;
 using AmazonAppBackend.Storage;
 using AmazonAppBackend.Storage.FriendRequestStore;
 using AmazonAppBackend.Storage.ImageStore;
@@ -10,7 +9,14 @@ using Amazon.S3;
 using AmazonAppBackend.Configuration;
 using Microsoft.Extensions.Options;
 using Amazon.Runtime;
+using AmazonAppBackend.Configuration.Clients;
 using AmazonAppBackend.Storage.EmailStore;
+using AmazonAppBackend.Configuration.Settings;
+using AmazonAppBackend.Services.FriendServices;
+using AmazonAppBackend.Services.FriendService;
+using AmazonAppBackend.Services.EmailService;
+using AmazonAppBackend.Services.ProfileService;
+using AmazonAppBackend.Services.ImageService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,31 +33,36 @@ builder.Services.AddScoped<IFriendRequestStore, PostgreSqlStore>();
 builder.Services.AddDbContext<DataContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("PostgreSQLConnection")));
 
 builder.Services.AddScoped<IImageService, ImageService>();
-builder.Services.Configure<ProfilePicS3Settings>(builder.Configuration.GetSection("S3ProfilePicConfig"));
+
+builder.Services.Configure<AWSConfig>(builder.Configuration.GetSection("AWSConfig"));
+builder.Services.Configure<S3ProfilePicConfig>(builder.Configuration.GetSection("S3ProfilePicConfig"));
 builder.Services.AddScoped<IImageStore, ImageS3BucketStore>();
 builder.Services.AddScoped(sp =>
 {
-    var s3BucketOptions = sp.GetRequiredService<IOptions<ProfilePicS3Settings>>().Value;
-    var credentials = new BasicAWSCredentials(s3BucketOptions.AccessKey, s3BucketOptions.SecretKey);
+    var awsConfig = sp.GetRequiredService<IOptions<AWSConfig>>().Value;
+    var s3ProfilePicConfig = sp.GetRequiredService<IOptions<S3ProfilePicConfig>>().Value;
+    var credentials = new BasicAWSCredentials(awsConfig.AccessKey, awsConfig.SecretKey);
     var s3Config = new AmazonS3Config()
     {
-        RegionEndpoint = RegionEndpoint.GetBySystemName(s3BucketOptions.RegionEndpoint)
+        RegionEndpoint = RegionEndpoint.GetBySystemName(s3ProfilePicConfig.RegionEndpoint)
     };
-    return new ImageS3BucketConfig(new AmazonS3Client(credentials, s3Config), s3BucketOptions.BucketName);
+    return new ImageS3BucketConfig(new AmazonS3Client(credentials, s3Config), s3ProfilePicConfig.BucketName);
 });
+builder.Services.AddScoped<IImageStore, ImageS3BucketStore>();
 
-builder.Services.Configure<EmailContentS3BucketSettings>(builder.Configuration.GetSection("S3EmailContentConfig"));
+builder.Services.Configure<S3EmailContentConfig>(builder.Configuration.GetSection("S3EmailContentConfig"));
 builder.Services.AddScoped<IEmailService, MailKitService>();
 builder.Services.AddScoped<IEmailStore, S3BucketEmailStore>();
 builder.Services.AddScoped(sp =>
 {
-    var s3BucketOptions = sp.GetRequiredService<IOptions<EmailContentS3BucketSettings>>().Value;
-    var credentials = new BasicAWSCredentials(s3BucketOptions.AccessKey, s3BucketOptions.SecretKey);
+    var awsConfig = sp.GetRequiredService<IOptions<AWSConfig>>().Value;
+    var s3EmailContentConfig = sp.GetRequiredService<IOptions<S3EmailContentConfig>>().Value;
+    var credentials = new BasicAWSCredentials(awsConfig.AccessKey, awsConfig.SecretKey);
     var s3Config = new AmazonS3Config()
     {
-        RegionEndpoint = RegionEndpoint.GetBySystemName(s3BucketOptions.RegionEndpoint)
+        RegionEndpoint = RegionEndpoint.GetBySystemName(s3EmailContentConfig.RegionEndpoint)
     };
-    return new EmailContentS3BucketConfig(new AmazonS3Client(credentials, s3Config), s3BucketOptions.BucketName);
+    return new EmailContentS3BucketConfig(new AmazonS3Client(credentials, s3Config), s3EmailContentConfig.BucketName);
 });
 
 builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("GmailSettings"));

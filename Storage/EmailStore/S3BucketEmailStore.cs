@@ -1,6 +1,6 @@
 ﻿using Amazon.S3;
 using Amazon.S3.Model;
-using AmazonAppBackend.Configuration;
+using AmazonAppBackend.Configuration.Clients;
 
 namespace AmazonAppBackend.Storage.EmailStore;
 

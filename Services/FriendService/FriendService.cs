@@ -3,8 +3,9 @@ using AmazonAppBackend.DTO;
 using AmazonAppBackend.Exceptions.FriendExceptions;
 using AmazonAppBackend.Extensions;
 using AmazonAppBackend.Storage.FriendRequestStore;
+using AmazonAppBackend.Services.FriendService;
 
-namespace AmazonAppBackend.Services;
+namespace AmazonAppBackend.Services.FriendServices;
 
 public class FriendService : IFriendService
 {

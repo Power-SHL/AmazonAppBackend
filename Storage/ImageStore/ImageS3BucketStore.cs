@@ -2,7 +2,7 @@
 using Amazon.S3.Model;
 using AmazonAppBackend.Exceptions.ImageExceptions;
 using System.Net;
-using AmazonAppBackend.Configuration;
+using AmazonAppBackend.Configuration.Clients;
 
 namespace AmazonAppBackend.Storage.ImageStore;
 
