@@ -10,6 +10,7 @@ public interface IProfileStore
     Task<UnverifiedProfile> GetUnverifiedProfileByEmail(string email);
     Task<Profile> VerifyProfile(string username);
     Task AddResetPasswordRequest(ResetPasswordRequest request);
+    Task ResetPassword(ChangedPasswordRequest request);
     Task AddFriend (string friend1, string friend2);
     Task RemoveFriend(string friend1, string friend2);
     Task DeleteProfile(string username);

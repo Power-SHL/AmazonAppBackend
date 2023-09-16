@@ -8,6 +8,7 @@ public interface IProfileService
     Task<UnverifiedProfile> CreateProfile(UnverifiedProfile profile);
     Task<Profile> UpdateProfile(Profile profile);
     Task<Profile> VerifyProfile(string username, string verificationCode);
-    Task ResetPassword(ResetPasswordRequest request);
+    Task AddResetPasswordRequest(ResetPasswordRequest request);
+    Task ResetPassword(ChangedPasswordRequest request);
     Task DeleteProfile(string username);
 }

@@ -2,6 +2,7 @@
 using AmazonAppBackend.DTO;
 using AmazonAppBackend.Exceptions.FriendExceptions;
 using AmazonAppBackend.Exceptions.ProfileExceptions;
+using AmazonAppBackend.Exceptions.ResetPasswordExceptions;
 using AmazonAppBackend.Storage.ProfileStore;
 using AmazonAppBackend.Storage.FriendRequestStore;
 using Microsoft.EntityFrameworkCore;
@@ -195,5 +196,14 @@ public class PostgreSqlStore : IProfileStore, IFriendRequestStore
             throw new ResetPasswordRequestDuplicateException($"Reset password request for {request.Username} already exists");
         }
     }
-    
+
+    public async Task ResetPassword(ChangedPasswordRequest request)
+    {
+        var resetPasswordRequest = await _context.ResetPasswordRequests.FindAsync(request.Username)
+                                   ?? throw new ResetPasswordRequestNotFoundException($"Reset password request for {request.Username} not found");
+        _context.ResetPasswordRequests.Remove(resetPasswordRequest);
+        var profile = await _context.Profiles.FindAsync(request.Username);
+        profile.Password = request.Password;
+        await _context.SaveChangesAsync();
+    }
 }

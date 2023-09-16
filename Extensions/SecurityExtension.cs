@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using AmazonAppBackend.Exceptions.FriendExceptions;
+using AmazonAppBackend.Exceptions.ResetPasswordExceptions;
 
 namespace AmazonAppBackend.Extensions;
 public static class SecurityExtension
@@ -164,6 +165,50 @@ public static class SecurityExtension
         if (errorMessage.Length != 0)
         {
             throw new FriendRequestInvalidException(errorMessage.ToString());
+        }
+    }
+
+    public static string GenerateRandomCode()
+    {
+        return Guid.NewGuid().ToString("N");
+    }
+
+    public static bool IsValidCode(this string code)
+    {
+        try
+        {
+            return Regex.IsMatch(code,
+                @"^[0-9a-fA-F]{32}$",
+                RegexOptions.None, TimeSpan.FromMilliseconds(250));
+        }
+        catch (RegexMatchTimeoutException)
+        {
+            return false;
+        }
+
+    }
+
+    public static void ValidateChangedPasswordRequest(this ChangedPasswordRequest request)
+    {
+        StringBuilder errorMessage = new();
+        if (!request.Username.IsValidUsername())
+        {
+            errorMessage.Append("Username format is invalid.\n");
+        }
+
+        if (!request.Password.IsValidPassword())
+        {
+            errorMessage.Append("Password format is invalid.\n");
+        }
+
+        if (!request.Code.IsValidCode())
+        {
+            errorMessage.Append("Code format is invalid.\n");
+        }
+
+        if (errorMessage.Length != 0)
+        {
+            throw new ResetPasswordRequestInvalidException(errorMessage.ToString());
         }
     }
 }

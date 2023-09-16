@@ -1,4 +1,4 @@
-﻿namespace AmazonAppBackend.Exceptions.ProfileExceptions;
+﻿namespace AmazonAppBackend.Exceptions.ResetPasswordExceptions;
 
 public class ResetPasswordRequestDuplicateException : Exception
 {

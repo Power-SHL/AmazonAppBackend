@@ -4,6 +4,7 @@ using AmazonAppBackend.DTO;
 using AmazonAppBackend.Extensions;
 using AmazonAppBackend.Services.EmailService;
 using AmazonAppBackend.Services.ProfileService;
+using AmazonAppBackend.Exceptions.ResetPasswordExceptions;
 
 namespace AmazonAppBackend.Controllers;
 
@@ -50,7 +51,7 @@ public class ProfileController : ControllerBase
         {
             profile.ValidateProfile();
             profile.Password = profile.Password.BCryptHash();
-            UnverifiedProfile unverifiedProfile = new (profile, Guid.NewGuid().ToString("N"));
+            UnverifiedProfile unverifiedProfile = new (profile, SecurityExtension.GenerateRandomCode());
             await _profileService.CreateProfile(unverifiedProfile);
             await _emailService.VerifyEmail(unverifiedProfile);
 
@@ -136,6 +137,10 @@ public class ProfileController : ControllerBase
     public async Task<ActionResult> UpdateProfile(string username, PutProfile partProfile)
     {
         username = username.ToLower();
+        if (!username.IsValidUsername())
+        {
+            return BadRequest("Username format is invalid");
+        }
         try
         {
             partProfile.ValidatePutProfile();
@@ -183,7 +188,7 @@ public class ProfileController : ControllerBase
     }
 
     [HttpPost("{username}/reset")]
-    public async Task<ActionResult> ResetPassword(string username)
+    public async Task<ActionResult> ResetPasswordRequest(string username)
     {
         username = username.ToLower();
         if (!username.IsValidUsername())
@@ -192,8 +197,8 @@ public class ProfileController : ControllerBase
         }
         try
         {
-            var resetRequest = new ResetPasswordRequest(username, Guid.NewGuid().ToString("N"));
-            await _profileService.ResetPassword(resetRequest);
+            var resetRequest = new ResetPasswordRequest(username, SecurityExtension.GenerateRandomCode());
+            await _profileService.AddResetPasswordRequest(resetRequest);
             await _emailService.ResetPasswordEmail(resetRequest);
             return Ok($"Password reset request sent to {resetRequest.Username}");
         }
@@ -211,4 +216,30 @@ public class ProfileController : ControllerBase
             throw;
         }
     }
+
+    [HttpPut("reset")]
+    public async Task<ActionResult> ResetPassword(ChangedPasswordRequest resetRequest)
+    {
+        try
+        {
+            resetRequest.ValidateChangedPasswordRequest();
+            resetRequest.Password = resetRequest.Password.BCryptHash();
+            await _profileService.ResetPassword(resetRequest);
+            return Ok($"Password reset for {resetRequest.Username}");
+        }
+        catch (Exception e)
+        {
+
+            if (e is ResetPasswordRequestNotFoundException)
+            {
+                return NotFound($"Password reset request for {resetRequest.Username} not found");
+            }
+
+            if (e is ResetPasswordRequestInvalidException)
+            {
+                return BadRequest(e.Message);
+            }
+            throw;
+        }
+    }   
 }

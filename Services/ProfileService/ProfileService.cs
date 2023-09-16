@@ -61,10 +61,9 @@ public class ProfileService : IProfileService
             {
                 throw new ProfileDuplicateException($"Profile {profile.Email} already in use.");
             }
-            else
-            {
-                return await _profileStore.UpdateProfile(profile);
-            }
+
+            return await _profileStore.UpdateProfile(profile);
+            
         }
         catch (ProfileNotFoundException)
         {
@@ -72,9 +71,14 @@ public class ProfileService : IProfileService
         }
     }
 
-    public async Task ResetPassword(ResetPasswordRequest request)
+    public async Task AddResetPasswordRequest(ResetPasswordRequest request)
     {
         await _profileStore.CheckProfilesExist(new List<string>(){request.Username});
         await _profileStore.AddResetPasswordRequest(request);
+    }
+
+    public async Task ResetPassword(ChangedPasswordRequest request)
+    {
+        await _profileStore.ResetPassword(request);
     }
 }
