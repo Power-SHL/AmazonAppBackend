@@ -2,6 +2,7 @@
 using AmazonAppBackend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -10,9 +11,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AmazonAppBackend.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230912184032_Verification")]
+    partial class Verification
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -86,23 +89,6 @@ namespace AmazonAppBackend.Migrations
                     b.ToTable("Profiles", (string)null);
                 });
 
-            modelBuilder.Entity("AmazonAppBackend.DTO.ResetPasswordRequest", b =>
-                {
-                    b.Property<string>("Username")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Username");
-
-                    b.HasIndex("Code")
-                        .IsUnique();
-
-                    b.ToTable("ResetPasswordRequests", (string)null);
-                });
-
             modelBuilder.Entity("AmazonAppBackend.DTO.UnverifiedProfile", b =>
                 {
                     b.Property<string>("Username")
@@ -172,17 +158,6 @@ namespace AmazonAppBackend.Migrations
                     b.Navigation("User1Profile");
 
                     b.Navigation("User2Profile");
-                });
-
-            modelBuilder.Entity("AmazonAppBackend.DTO.ResetPasswordRequest", b =>
-                {
-                    b.HasOne("AmazonAppBackend.DTO.Profile", "User")
-                        .WithMany()
-                        .HasForeignKey("Username")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
                 });
 #pragma warning restore 612, 618
         }

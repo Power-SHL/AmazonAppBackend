@@ -2,6 +2,7 @@
 using AmazonAppBackend.DTO;
 using AmazonAppBackend.Exceptions.FriendExceptions;
 using AmazonAppBackend.Exceptions.ProfileExceptions;
+using AmazonAppBackend.Exceptions.ResetPasswordExceptions;
 using AmazonAppBackend.Storage.ProfileStore;
 using AmazonAppBackend.Storage.FriendRequestStore;
 using Microsoft.EntityFrameworkCore;
@@ -23,23 +24,47 @@ public class PostgreSqlStore : IProfileStore, IFriendRequestStore
         return profile ?? throw new ProfileNotFoundException($"Profile {username} not found");
     }
 
+    public async Task<UnverifiedProfile> GetUnverifiedProfile(string username)
+    {
+        var profile = await _context.UnverifiedProfiles.FindAsync(username);
+        return profile ?? throw new ProfileNotFoundException($"Profile {username} not found");
+    }
+
+    public async Task<UnverifiedProfile> GetUnverifiedProfileByEmail(string email)
+    {
+        var profile = await _context.UnverifiedProfiles.FirstOrDefaultAsync(p => p.Email == email);
+        return profile ?? throw new ProfileNotFoundException($"Profile with email {email} not found");
+    }
+
     public async Task<Profile> GetProfileByEmail(string email)
     {
         var profile = await _context.Profiles.FirstOrDefaultAsync(p => p.Email == email);
         return profile ?? throw new ProfileNotFoundException($"Profile with email {email} not found");
     }
 
-    public async Task<Profile> CreateProfile(Profile profile)
+    public async Task<Profile> VerifyProfile(string username)
+    {
+        var unverifiedProfile = await _context.UnverifiedProfiles.FindAsync(username) 
+                      ?? throw new ProfileNotFoundException($"Profile {username} not found");
+        _context.UnverifiedProfiles.Remove(unverifiedProfile);
+
+        var profile = new Profile(unverifiedProfile);
+        await _context.Profiles.AddAsync(profile);
+        await _context.SaveChangesAsync();
+        return profile;
+    }
+
+    public async Task<UnverifiedProfile> CreateProfile(UnverifiedProfile profile)
     {
         try
         {
-            await _context.Profiles.AddAsync(profile);
+            await _context.UnverifiedProfiles.AddAsync(profile);
             await _context.SaveChangesAsync();
             return profile;
         }
         catch (DbUpdateException)
         {
-            throw new ProfileAlreadyExistsException($"Profile {profile.Username} already exists");
+            throw new ProfileDuplicateException($"Profile {profile.Username} already exists");
         }
     }
     public async Task<Profile> UpdateProfile(Profile profile)
@@ -105,7 +130,7 @@ public class PostgreSqlStore : IProfileStore, IFriendRequestStore
     {
         try
         {
-            var friendRequest = await _context.Friend_Requests
+            var friendRequest = await _context.FriendRequests
                 .FirstOrDefaultAsync(r => r.Sender == request.Receiver && r.Receiver == request.Sender);
             if (friendRequest != null)
             {
@@ -113,14 +138,14 @@ public class PostgreSqlStore : IProfileStore, IFriendRequestStore
                     new Friendship(request.Sender, request.Receiver) : new Friendship(request.Receiver, request.Sender);
 
                 await _context.Friendships.AddAsync(friendship);
-                _context.Friend_Requests.Remove(friendRequest);
+                _context.FriendRequests.Remove(friendRequest);
                 await _context.SaveChangesAsync();
                 throw new FriendRequestAcceptedInsteadException($"{request.Sender} and {request.Receiver} are now friends");
 
             }
             else
             {
-                _context.Friend_Requests.Add(request);
+                _context.FriendRequests.Add(request);
                 await _context.SaveChangesAsync();
             }
         }
@@ -132,7 +157,7 @@ public class PostgreSqlStore : IProfileStore, IFriendRequestStore
 
     public async Task RemoveFriendRequest(FriendRequest request)
     {
-        _context.Friend_Requests.Remove(request);
+        _context.FriendRequests.Remove(request);
         if (await _context.SaveChangesAsync() == 0)
         {
             throw new FriendRequestNotFoundException($"Friend request from {request.Sender} to {request.Receiver} not found");
@@ -141,7 +166,7 @@ public class PostgreSqlStore : IProfileStore, IFriendRequestStore
 
     public async Task<List<FriendRequest>> GetReceivedFriendRequests(string username)
     {
-        var friendRequests = await _context.Friend_Requests
+        var friendRequests = await _context.FriendRequests
             .Where(request => request.Receiver == username)
             .OrderByDescending(request => request.TimeAdded)
             .ToListAsync();
@@ -151,11 +176,34 @@ public class PostgreSqlStore : IProfileStore, IFriendRequestStore
 
     public async Task<List<FriendRequest>> GetSentFriendRequests(string username)
     {
-        var friendRequests = await _context.Friend_Requests
+        var friendRequests = await _context.FriendRequests
             .Where(request => request.Sender == username)
             .OrderByDescending(request => request.TimeAdded)
             .ToListAsync();
 
         return friendRequests.Any() ? friendRequests : throw new FriendRequestNotFoundException($"No friend requests sent by {username}");
+    }
+
+    public async Task AddResetPasswordRequest(ResetPasswordRequest request)
+    {
+        try
+        {
+            _context.ResetPasswordRequests.Add(request);
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateException)
+        {
+            throw new ResetPasswordRequestDuplicateException($"Reset password request for {request.Username} already exists");
+        }
+    }
+
+    public async Task ResetPassword(ChangedPasswordRequest request)
+    {
+        var resetPasswordRequest = await _context.ResetPasswordRequests.FindAsync(request.Username)
+                                   ?? throw new ResetPasswordRequestNotFoundException($"Reset password request for {request.Username} not found");
+        _context.ResetPasswordRequests.Remove(resetPasswordRequest);
+        var profile = await _context.Profiles.FindAsync(request.Username);
+        profile.Password = request.Password;
+        await _context.SaveChangesAsync();
     }
 }
