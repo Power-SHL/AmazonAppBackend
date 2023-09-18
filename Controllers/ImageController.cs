@@ -2,6 +2,7 @@
 using AmazonAppBackend.Exceptions.ImageExceptions;
 using AmazonAppBackend.Exceptions.ProfileExceptions;
 using AmazonAppBackend.Extensions;
+using AmazonAppBackend.Services.AuthorizationService;
 using AmazonAppBackend.Services.ImageService;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,10 +13,12 @@ namespace AmazonAppBackend.Controllers;
 public class ImageController : ControllerBase
 {
     private readonly IImageService _imageService;
+    private readonly IAuthorizationService _authorizationService;
 
-    public ImageController(IImageService imageService)
+    public ImageController(IImageService imageService, IAuthorizationService authorizationService)
     {
         _imageService = imageService;
+        _authorizationService = authorizationService;
     }
 
     [HttpPost]
@@ -38,6 +41,7 @@ public class ImageController : ControllerBase
 
         try
         {
+            _authorizationService.AuthorizeRequest(User, username);
             await _imageService.UploadImage(image, username);
             return Created($"api/images/{username}", $"Profile picture for {username} successfully posted.");
         }
@@ -46,6 +50,10 @@ public class ImageController : ControllerBase
             if (ex is ProfileNotFoundException)
             {
                 return NotFound($"User with username {username} not found.");
+            }
+            if (ex is UnauthorizedAccessException)
+            {
+                return Unauthorized(ex.Message);
             }
             throw;
         }
@@ -84,6 +92,7 @@ public class ImageController : ControllerBase
         }
         try
         {
+            _authorizationService.AuthorizeRequest(User, username);
             await _imageService.DeleteImage(username);
             return Ok($"Profile picture for {username} successfully deleted.");
         }
@@ -92,6 +101,10 @@ public class ImageController : ControllerBase
             if (e is ImageNotFoundException)
             {
                 return NotFound($"Profile picture for {username} not found.");
+            }
+            if (e is UnauthorizedAccessException)
+            {
+                return Unauthorized(e.Message);
             }
             throw;
         }

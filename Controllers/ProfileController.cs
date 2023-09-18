@@ -5,6 +5,8 @@ using AmazonAppBackend.Extensions;
 using AmazonAppBackend.Services.EmailService;
 using AmazonAppBackend.Services.ProfileService;
 using AmazonAppBackend.Exceptions.ResetPasswordExceptions;
+using AmazonAppBackend.Services.AuthorizationService;
+using AmazonAppBackend.Exceptions.AuthenticationExceptions;
 
 namespace AmazonAppBackend.Controllers;
 
@@ -14,11 +16,13 @@ public class ProfileController : ControllerBase
 {
     private readonly IProfileService _profileService;
     private readonly IEmailService _emailService;
+    private readonly IAuthorizationService _authorizationService;
 
-    public ProfileController(IProfileService profileService, IEmailService emailService)
+    public ProfileController(IProfileService profileService, IEmailService emailService, IAuthorizationService authorizationService)
     {
         _profileService = profileService;
         _emailService = emailService;
+        _authorizationService = authorizationService;
     }
 
     [HttpGet("{username}")]
@@ -66,6 +70,32 @@ public class ProfileController : ControllerBase
             if (e is ProfileInvalidException)
             {
                 return BadRequest(e.Message);
+            }
+            throw;
+        }
+    }
+
+    [HttpPost("login")]
+    public async Task<ActionResult<Profile>> Login(SignInRequest request)
+    {
+        if (!request.Password.IsValidPassword())
+        {
+            return BadRequest("Password format is invalid");
+        }
+        try
+        {
+            var token = await _authorizationService.AuthorizeUser(request);
+            return Ok(token);
+        }
+        catch (Exception e)
+        {
+            if (e is ProfileNotFoundException || e is IncorrectPasswordException)
+            {
+                return Unauthorized($"Email or password is incorrect. Try again or sign up.");
+            }
+            if (e is ProfileInvalidException)
+            {
+                return BadRequest("Invalid username or email");
             }
             throw;
         }
@@ -143,6 +173,7 @@ public class ProfileController : ControllerBase
         }
         try
         {
+            _authorizationService.AuthorizeRequest(User, username);
             partProfile.ValidatePutProfile();
             var profile = await _profileService.GetProfile(username);
             profile.SetTo(partProfile);
@@ -174,6 +205,7 @@ public class ProfileController : ControllerBase
         }
         try
         {
+            _authorizationService.AuthorizeRequest(User, username);
             await _profileService.DeleteProfile(username);
             return Ok($"User with username {username} deleted");
         }
@@ -182,6 +214,10 @@ public class ProfileController : ControllerBase
             if (e is ProfileNotFoundException)
             {
                 return NotFound($"User with username {username} not found");
+            }
+            if (e is UnauthorizedAccessException)
+            {
+                return Unauthorized(e.Message);
             }
             throw;
         }

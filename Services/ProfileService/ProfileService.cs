@@ -37,6 +37,11 @@ public class ProfileService : IProfileService
         return await _profileStore.GetProfile(username);
     }
 
+    public async Task<Profile> GetProfileByEmail(string email)
+    {
+        return await _profileStore.GetProfileByEmail(email);
+    }
+
     public async Task<Profile> VerifyProfile(string username, string verificationCode)
     {
         var profile = await _profileStore.GetUnverifiedProfile(username);
