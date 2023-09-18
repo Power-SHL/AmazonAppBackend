@@ -187,7 +187,7 @@ public class ProfileController : ControllerBase
         }
     }
 
-    [HttpPost("{username}/reset")]
+    [HttpPost("reset/{username}")]
     public async Task<ActionResult> ResetPasswordRequest(string username)
     {
         username = username.ToLower();
@@ -212,6 +212,31 @@ public class ProfileController : ControllerBase
             if (e is ResetPasswordRequestDuplicateException)
             {
                 return Conflict($"Password reset request already sent to {username}");
+            }
+            throw;
+        }
+    }
+
+    [HttpGet("reset/{username}")]
+    public async Task<ActionResult<Profile>> ResendResetEmail(string username)
+    {
+        username = username.ToLower();
+        if (!username.IsValidUsername())
+        {
+            return BadRequest("Username format is invalid");
+        }
+
+        try
+        {
+            var request = await _profileService.GetResetPasswordRequest(username);
+            await _emailService.ResetPasswordEmail(request);
+            return Ok($"Email successfully sent to {username}.");
+        }
+        catch (Exception e)
+        {
+            if (e is ResetPasswordRequestNotFoundException)
+            {
+                return NotFound($"Password reset request for {username} not found.");
             }
             throw;
         }
