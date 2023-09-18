@@ -77,6 +77,11 @@ public class ProfileService : IProfileService
         await _profileStore.AddResetPasswordRequest(request);
     }
 
+    public async Task<ResetPasswordRequest> GetResetPasswordRequest(string username)
+    {
+        return await _profileStore.GetResetPasswordRequest(username);
+    }
+
     public async Task ResetPassword(ChangedPasswordRequest request)
     {
         await _profileStore.ResetPassword(request);

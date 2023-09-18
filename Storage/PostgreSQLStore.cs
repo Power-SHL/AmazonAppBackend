@@ -197,6 +197,15 @@ public class PostgreSqlStore : IProfileStore, IFriendRequestStore
         }
     }
 
+    public async Task<ResetPasswordRequest> GetResetPasswordRequest(string username)
+    {
+        var request = await _context.ResetPasswordRequests.
+            Include(r => r.User).
+            FirstOrDefaultAsync(r => r.Username == username);
+
+        return request ?? throw new ResetPasswordRequestNotFoundException($"Reset password request for {username} not found.");
+    }
+
     public async Task ResetPassword(ChangedPasswordRequest request)
     {
         var resetPasswordRequest = await _context.ResetPasswordRequests.FindAsync(request.Username)

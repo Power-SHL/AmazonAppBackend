@@ -9,6 +9,7 @@ public interface IProfileService
     Task<Profile> UpdateProfile(Profile profile);
     Task<Profile> VerifyProfile(string username, string verificationCode);
     Task AddResetPasswordRequest(ResetPasswordRequest request);
+    Task<ResetPasswordRequest> GetResetPasswordRequest(string username);
     Task ResetPassword(ChangedPasswordRequest request);
     Task DeleteProfile(string username);
 }
