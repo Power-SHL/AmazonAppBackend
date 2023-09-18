@@ -4,6 +4,7 @@ namespace AmazonAppBackend.Services.ProfileService;
 public interface IProfileService
 {
     Task<Profile> GetProfile(string username);
+    Task<Profile> GetProfileByEmail(string email);
     Task<UnverifiedProfile> GetUnverifiedProfile(string username);
     Task<UnverifiedProfile> CreateProfile(UnverifiedProfile profile);
     Task<Profile> UpdateProfile(Profile profile);
