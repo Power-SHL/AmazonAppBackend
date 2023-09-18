@@ -75,8 +75,8 @@ public class ProfileController : ControllerBase
         }
     }
 
-    [HttpPost("sign_in")]
-    public async Task<ActionResult<Profile>> SignIn(SignInRequest request)
+    [HttpPost("login")]
+    public async Task<ActionResult<Profile>> Login(SignInRequest request)
     {
         if (!request.Password.IsValidPassword())
         {
@@ -173,6 +173,7 @@ public class ProfileController : ControllerBase
         }
         try
         {
+            _authorizationService.AuthorizeRequest(User, username);
             partProfile.ValidatePutProfile();
             var profile = await _profileService.GetProfile(username);
             profile.SetTo(partProfile);
@@ -204,6 +205,7 @@ public class ProfileController : ControllerBase
         }
         try
         {
+            _authorizationService.AuthorizeRequest(User, username);
             await _profileService.DeleteProfile(username);
             return Ok($"User with username {username} deleted");
         }
@@ -212,6 +214,10 @@ public class ProfileController : ControllerBase
             if (e is ProfileNotFoundException)
             {
                 return NotFound($"User with username {username} not found");
+            }
+            if (e is UnauthorizedAccessException)
+            {
+                return Unauthorized(e.Message);
             }
             throw;
         }

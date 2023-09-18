@@ -23,6 +23,34 @@ public class JWTAuthorizationService : IAuthorizationService
         _profileService = profileService;
         _config = config;
     }
+
+    public void AuthorizeRequest(ClaimsPrincipal user, string username)
+    {
+        string? usernameClaim = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
+
+        if (usernameClaim is null || usernameClaim != username)
+        {
+            throw new UnauthorizedAccessException($"{username} is not authorized to perform this action");
+        }
+    }
+
+    public void AuthorizeRequest(ClaimsPrincipal user, List<string> usernames)
+    {
+        foreach(string username in usernames)
+        {
+            try
+            {
+                AuthorizeRequest(user, username);
+                return;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                continue;
+            }
+        }
+        throw new UnauthorizedAccessException($"You are not authorized to perform this action");
+    }
+
     public async Task<AuthenticationToken> AuthorizeUser(SignInRequest request)
     {
         Profile profile;
@@ -39,10 +67,10 @@ public class JWTAuthorizationService : IAuthorizationService
             throw new ProfileInvalidException("Invalid username or email");
         }
 
-        if (!request.Password.BCryptVerify(profile.Password))
+        if (request.Password.BCryptVerify(profile.Password))
         {
             var claims = new[] {
-                        new Claim(ClaimTypes.Email, profile.Email)
+                        new Claim(ClaimTypes.Name, profile.Username)
                 };
             var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config.SecretKey));
             var signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);

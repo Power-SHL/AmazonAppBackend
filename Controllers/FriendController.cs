@@ -4,6 +4,7 @@ using AmazonAppBackend.DTO;
 using AmazonAppBackend.Extensions;
 using AmazonAppBackend.Exceptions.FriendExceptions;
 using AmazonAppBackend.Services.FriendService;
+using AmazonAppBackend.Services.AuthorizationService;
 
 namespace AmazonAppBackend.Controllers;
 
@@ -12,9 +13,11 @@ namespace AmazonAppBackend.Controllers;
 public class FriendController : ControllerBase
 {
     private readonly IFriendService _friendService;
-    public FriendController(IFriendService friendService)
+    private readonly IAuthorizationService _authorizationService;
+    public FriendController(IFriendService friendService, IAuthorizationService authorizationService)
     {
         _friendService = friendService;
+        _authorizationService = authorizationService;
     }
 
     [HttpGet("{username}")]
@@ -28,6 +31,7 @@ public class FriendController : ControllerBase
 
         try
         {
+            _authorizationService.AuthorizeRequest(User, username);
             var friends = await _friendService.GetFriends(username);
             return Ok(friends);
         }
@@ -37,9 +41,13 @@ public class FriendController : ControllerBase
             {
                 return NotFound($"Profile with username {username} not found.");
             }
-            else if (e is FriendNotFoundException)
+            if (e is FriendNotFoundException)
             {
                 return NotFound($"No friends found for user {username}");
+            }
+            if (e is UnauthorizedAccessException)
+            {
+                return Unauthorized(e.Message);
             }
 
             throw;
@@ -57,6 +65,7 @@ public class FriendController : ControllerBase
 
         try
         {
+            _authorizationService.AuthorizeRequest(User, username);
             var friendRequests = await _friendService.GetReceivedFriendRequests(username);
             return Ok(friendRequests);
         }
@@ -70,7 +79,10 @@ public class FriendController : ControllerBase
             {
                 return NotFound($"No friend requests found for user {username}");
             }
-
+            else if (e is UnauthorizedAccessException)
+            {
+                return Unauthorized(e.Message);
+            }
             throw;
         }
     }
@@ -86,6 +98,7 @@ public class FriendController : ControllerBase
 
         try
         {
+            _authorizationService.AuthorizeRequest(User, username);
             var friendRequests = await _friendService.GetSentFriendRequests(username);
             return Ok(friendRequests);
         }
@@ -95,9 +108,13 @@ public class FriendController : ControllerBase
             {
                 return NotFound($"Profile with username {username} not found.");
             }
-            else if (e is FriendRequestNotFoundException)
+            if (e is FriendRequestNotFoundException)
             {
                 return NotFound($"No friend requests found for user {username}");
+            }
+            if (e is UnauthorizedAccessException)
+            {
+                return Unauthorized(e.Message);
             }
 
             throw;
@@ -110,6 +127,7 @@ public class FriendController : ControllerBase
         FriendRequest request = new(createRequest);
         try
         {
+            _authorizationService.AuthorizeRequest(User, createRequest.Sender);
             request.ValidateFriendRequest();
             await _friendService.SendFriendRequest(request);
             return Created($"api/friends/{request.Sender}",
@@ -138,6 +156,10 @@ public class FriendController : ControllerBase
                 return Created($"api/friends/{request.Sender}",
                     $"{request.Sender} and {request.Receiver} are now friends");
             }
+            else if (e is UnauthorizedAccessException)
+            {
+                return Unauthorized(e.Message);
+            }
 
             throw;
         }
@@ -148,6 +170,7 @@ public class FriendController : ControllerBase
     {
         try
         {
+            _authorizationService.AuthorizeRequest(User, request.Receiver);
             request.ValidateFriendRequest();
             await _friendService.AcceptFriendRequest(request);
             return Created($"api/friends/{request.Sender}", $"{request.Sender} and {request.Receiver} are now friends");
@@ -166,6 +189,10 @@ public class FriendController : ControllerBase
             {
                 return NotFound($"No friend request from {request.Sender} to {request.Receiver} was found");
             }
+            else if (e is UnauthorizedAccessException)
+            {
+                return Unauthorized(e.Message);
+            }
 
             throw;
         }
@@ -176,6 +203,7 @@ public class FriendController : ControllerBase
     {
         try
         {
+            _authorizationService.AuthorizeRequest(User, new List<string>() {request.Sender, request.Receiver });
             request.ValidateFriendRequest();
             await _friendService.RemoveFriend(request);
             return Ok($"{request.Sender} and {request.Receiver} are no longer friends");
@@ -195,7 +223,10 @@ public class FriendController : ControllerBase
             {
                 return NotFound($"No friend relationship between {request.Sender} and {request.Receiver} was found.");
             }
-
+            if(e is UnauthorizedAccessException)
+            {
+                return Unauthorized(e.Message);
+            }
             throw;
         }
     }
@@ -205,6 +236,7 @@ public class FriendController : ControllerBase
     {
         try
         {
+            _authorizationService.AuthorizeRequest(User, new List<string>() { request.Sender, request.Receiver });
             request.ValidateFriendRequest();
             await _friendService.RemoveFriendRequest(request);
             return Ok($"Friend request from {request.Sender} to {request.Receiver} was removed");
@@ -222,6 +254,10 @@ public class FriendController : ControllerBase
             else if (e is FriendRequestNotFoundException)
             {
                 return NotFound($"No friend request from {request.Sender} to {request.Receiver} was found");
+            }
+            else if (e is UnauthorizedAccessException)
+            {
+                return Unauthorized(e.Message);
             }
             throw;
         }
