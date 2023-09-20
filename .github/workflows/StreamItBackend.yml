@@ -9,19 +9,7 @@ env:
   CONFIGURATION: Release
   DOTNET_CORE_VERSION: 6.0.x
   WORKING_DIRECTORY: .
-  ConnectionStrings:PostgreSQLConnection: ${{ secrets.POSTGRESQL_CONNECTION_STRING }}
-  S3ProfilePicConfig:RegionEndpoint: ${{ secrets.S3_PROFILE_PIC_CONFIG_REGION_ENDPOINT}}
-  S3ProfilePicConfig:BucketName: ${{ secrets.S3_PROFILE_PIC_CONFIG_BUCKET_NAME }}
-  S3EmailContentConfig:RegionEndpoint: ${{ secrets.S3_EMAIL_CONTENT_CONFIG_REGION_ENDPOINT }}
-  S3EmailContentConfig:BucketName: ${{ secrets.S3_EMAIL_CONTENT_CONFIG_BUCKET_NAME }}
-  AWSConfig:AccessKey: ${{ secrets.AWS_CONFIG_ACCESSKEY }}
-  AWSConfig:SecretKey: ${{ secrets.AWS_CONFIG_SECRETKEY }}
-  GmailSettings:SenderEmail: ${{ secrets.GMAIL_SETTINGS_SENDER_EMAIL }}
-  GmailSettings:SenderPassword: ${{ secrets.GMAIL_SETTINGS_SENDER_PASSWORD }}
-  GmailSettings:SmtpServer: ${{ secrets.GMAIL_SETTINGS_SMTP_SERVER }}
-  JwtSettings:SecretKey: ${{ secrets.JWT_SETTINGS_SECRET_KEY }}
-  JwtSettings:Issuer: ${{ secrets.JWT_SETTINGS_ISSUER }}
-  JwtSettings:Audience: ${{ secrets.JWT_SETTINGS_AUDIENCE }}
+  
 
 jobs:
   build:
