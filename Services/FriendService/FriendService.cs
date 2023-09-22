@@ -1,9 +1,9 @@
 ﻿using AmazonAppBackend.Storage.ProfileStore;
-using AmazonAppBackend.DTO;
 using AmazonAppBackend.Exceptions.FriendExceptions;
 using AmazonAppBackend.Extensions;
 using AmazonAppBackend.Storage.FriendRequestStore;
 using AmazonAppBackend.Services.FriendService;
+using AmazonAppBackend.DTO.Friends;
 
 namespace AmazonAppBackend.Services.FriendServices;
 

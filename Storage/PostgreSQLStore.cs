@@ -1,11 +1,12 @@
 ﻿using AmazonAppBackend.Data;
-using AmazonAppBackend.DTO;
 using AmazonAppBackend.Exceptions.FriendExceptions;
 using AmazonAppBackend.Exceptions.ProfileExceptions;
 using AmazonAppBackend.Exceptions.ResetPasswordExceptions;
 using AmazonAppBackend.Storage.ProfileStore;
 using AmazonAppBackend.Storage.FriendRequestStore;
 using Microsoft.EntityFrameworkCore;
+using AmazonAppBackend.DTO.Friends;
+using AmazonAppBackend.DTO.Profiles;
 
 namespace AmazonAppBackend.Storage;
 

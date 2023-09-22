@@ -1,5 +1,5 @@
 ﻿using AmazonAppBackend.Configuration.Settings;
-using AmazonAppBackend.DTO;
+using AmazonAppBackend.DTO.Profiles;
 using AmazonAppBackend.Storage.EmailStore;
 using MailKit.Net.Smtp;
 using MailKit.Security;

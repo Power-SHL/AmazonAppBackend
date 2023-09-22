@@ -1,4 +1,4 @@
-﻿using AmazonAppBackend.DTO;
+﻿using AmazonAppBackend.DTO.Profiles;
 
 namespace AmazonAppBackend.Services.EmailService;
 

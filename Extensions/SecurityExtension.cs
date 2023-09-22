@@ -1,10 +1,11 @@
-﻿using AmazonAppBackend.DTO;
-using AmazonAppBackend.Exceptions.ProfileExceptions;
+﻿using AmazonAppBackend.Exceptions.ProfileExceptions;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using AmazonAppBackend.Exceptions.FriendExceptions;
 using AmazonAppBackend.Exceptions.ResetPasswordExceptions;
+using AmazonAppBackend.DTO.Friends;
+using AmazonAppBackend.DTO.Profiles;
 
 namespace AmazonAppBackend.Extensions;
 public static class SecurityExtension

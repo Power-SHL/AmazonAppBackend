@@ -1,4 +1,5 @@
-﻿using AmazonAppBackend.DTO;
+﻿using AmazonAppBackend.DTO.Friends;
+using AmazonAppBackend.DTO.Profiles;
 using Microsoft.EntityFrameworkCore;
 
 namespace AmazonAppBackend.Data

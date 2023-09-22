@@ -1,4 +1,4 @@
-﻿namespace AmazonAppBackend.DTO;
+﻿namespace AmazonAppBackend.DTO.Profiles;
 
 public record ResetPasswordRequest
 {

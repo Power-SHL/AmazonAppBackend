@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace AmazonAppBackend.DTO;
+namespace AmazonAppBackend.DTO.Friends;
 
 public record CreateFriendRequest
 {

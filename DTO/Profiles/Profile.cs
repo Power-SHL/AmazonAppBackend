@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace AmazonAppBackend.DTO;
+namespace AmazonAppBackend.DTO.Profiles;
 
 public record Profile
 {

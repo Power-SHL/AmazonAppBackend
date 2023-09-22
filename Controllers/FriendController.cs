@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using AmazonAppBackend.Exceptions.ProfileExceptions;
-using AmazonAppBackend.DTO;
 using AmazonAppBackend.Extensions;
 using AmazonAppBackend.Exceptions.FriendExceptions;
 using AmazonAppBackend.Services.FriendService;
 using AmazonAppBackend.Services.AuthorizationService;
+using AmazonAppBackend.DTO.Friends;
 
 namespace AmazonAppBackend.Controllers;
 
