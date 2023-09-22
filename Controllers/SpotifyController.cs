@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using SpotifyAPI.Web;
 using AmazonAppBackend.DTO.Social;
 using AmazonAppBackend.Services.FeedService;
-using AmazonAppBackend.Exceptions.FeedExceptions;
 
 namespace AmazonAppBackend.Controllers;
 

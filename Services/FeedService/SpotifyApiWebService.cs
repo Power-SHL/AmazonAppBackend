@@ -1,6 +1,5 @@
 ﻿using AmazonAppBackend.Configuration.Settings;
 using AmazonAppBackend.DTO.Social;
-using AmazonAppBackend.Exceptions.FeedExceptions;
 using Newtonsoft.Json.Linq;
 using SpotifyAPI.Web;
 
