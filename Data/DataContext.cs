@@ -1,5 +1,6 @@
 ﻿using AmazonAppBackend.DTO.Friends;
 using AmazonAppBackend.DTO.Profiles;
+using AmazonAppBackend.DTO.Social;
 using Microsoft.EntityFrameworkCore;
 
 namespace AmazonAppBackend.Data
@@ -10,6 +11,7 @@ namespace AmazonAppBackend.Data
         public DbSet<UnverifiedProfile> UnverifiedProfiles { get; set; }
         public DbSet<FriendRequest> FriendRequests { get; set; }
         public DbSet<Friendship> Friendships { get; set; }
+        public DbSet<Post> Posts { get; set; }
 
         public DbSet<ResetPasswordRequest> ResetPasswordRequests { get; set; }
 
@@ -28,6 +30,7 @@ namespace AmazonAppBackend.Data
             modelBuilder.Entity<Friendship>().ToTable("Friendships");
             modelBuilder.Entity<UnverifiedProfile>().ToTable("UnverifiedProfiles");
             modelBuilder.Entity<ResetPasswordRequest>().ToTable("ResetPasswordRequests");
+            modelBuilder.Entity<Post>().ToTable("Posts");
 
             // Primary and unique keys
             modelBuilder.Entity<Profile>().HasKey(p => p.Username);
@@ -41,6 +44,8 @@ namespace AmazonAppBackend.Data
 
             modelBuilder.Entity<ResetPasswordRequest>().HasKey(rpr => rpr.Username);
             modelBuilder.Entity<ResetPasswordRequest>().HasIndex(rpr => rpr.Code).IsUnique();
+
+            modelBuilder.Entity<Post>().HasKey(p => new {p.Username, p.Platform });
 
             // Define foreign key relationships
             modelBuilder.Entity<FriendRequest>()
@@ -71,6 +76,12 @@ namespace AmazonAppBackend.Data
                 .HasOne(rpr => rpr.User)
                 .WithMany()
                 .HasForeignKey(rpr => rpr.Username)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Post>()
+                .HasOne(p => p.Profile)
+                .WithOne()
+                .HasForeignKey<Post>(p => p.Username)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }

@@ -3,5 +3,5 @@ namespace AmazonAppBackend.Services.PostService;
 
 public interface IFeedService
 {
-    Task CreatePost(Post post);
+    Task CreateSpotifyPost(Post post);
 }

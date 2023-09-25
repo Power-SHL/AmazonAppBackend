@@ -24,6 +24,8 @@ using AmazonAppBackend.Services.AuthorizationService;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
 using AmazonAppBackend.Services.FeedService;
+using AmazonAppBackend.Services.PostService;
+using AmazonAppBackend.Storage.FeedStore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -163,6 +165,8 @@ builder.Services.AddScoped(sp =>
 });
 
 builder.Services.AddScoped<ISpotifyService, SpotifyApiWebService>();
+builder.Services.AddScoped<IFeedService, FeedService>();
+builder.Services.AddScoped<IFeedStore, PostgreSqlStore>();
 
 
 var app = builder.Build();
