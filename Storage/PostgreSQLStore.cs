@@ -1,15 +1,19 @@
 ﻿using AmazonAppBackend.Data;
-using AmazonAppBackend.DTO;
 using AmazonAppBackend.Exceptions.FriendExceptions;
 using AmazonAppBackend.Exceptions.ProfileExceptions;
 using AmazonAppBackend.Exceptions.ResetPasswordExceptions;
 using AmazonAppBackend.Storage.ProfileStore;
 using AmazonAppBackend.Storage.FriendRequestStore;
 using Microsoft.EntityFrameworkCore;
+using AmazonAppBackend.DTO.Friends;
+using AmazonAppBackend.DTO.Profiles;
+using AmazonAppBackend.Storage.FeedStore;
+using AmazonAppBackend.DTO.Social;
+using AmazonAppBackend.Exceptions.FeedExceptions;
 
 namespace AmazonAppBackend.Storage;
 
-public class PostgreSqlStore : IProfileStore, IFriendRequestStore
+public class PostgreSqlStore : IProfileStore, IFriendRequestStore, IFeedStore
 {
     private readonly DataContext _context;
 
@@ -214,5 +218,18 @@ public class PostgreSqlStore : IProfileStore, IFriendRequestStore
         var profile = await _context.Profiles.FindAsync(request.Username);
         profile.Password = request.Password;
         await _context.SaveChangesAsync();
+    }
+
+    public async Task CreatePost(Post post)
+    {
+        try
+        {
+            await _context.Posts.AddAsync(post);
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateException)
+        {
+            throw new PostDuplicateException($"Post by {post.Username} on {post.Username} already exists.");
+        }
     }
 }

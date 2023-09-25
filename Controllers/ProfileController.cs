@@ -1,12 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
 using AmazonAppBackend.Exceptions.ProfileExceptions;
-using AmazonAppBackend.DTO;
 using AmazonAppBackend.Extensions;
 using AmazonAppBackend.Services.EmailService;
 using AmazonAppBackend.Services.ProfileService;
 using AmazonAppBackend.Exceptions.ResetPasswordExceptions;
 using AmazonAppBackend.Services.AuthorizationService;
 using AmazonAppBackend.Exceptions.AuthenticationExceptions;
+using AmazonAppBackend.DTO.Profiles;
 
 namespace AmazonAppBackend.Controllers;
 

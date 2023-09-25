@@ -1,4 +1,4 @@
-﻿namespace AmazonAppBackend.DTO;
+﻿namespace AmazonAppBackend.DTO.Friends;
 public record Friend
 {
     public string Username { get; set; }

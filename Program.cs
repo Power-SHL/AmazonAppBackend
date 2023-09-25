@@ -7,7 +7,6 @@ using AmazonAppBackend.Storage.FriendRequestStore;
 using AmazonAppBackend.Storage.ImageStore;
 using AmazonAppBackend.Storage.ProfileStore;
 using Amazon.S3;
-using AmazonAppBackend.Configuration;
 using Microsoft.Extensions.Options;
 using Amazon.Runtime;
 using AmazonAppBackend.Configuration.Clients;
@@ -22,6 +21,11 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using AmazonAppBackend.Services.AuthorizationService;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication;
+using AmazonAppBackend.Services.FeedService;
+using AmazonAppBackend.Services.PostService;
+using AmazonAppBackend.Storage.FeedStore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -131,6 +135,38 @@ builder.Services.AddScoped(sp =>
     return jwtSettings;
 });
 builder.Services.AddScoped<IAuthorizationService, JWTAuthorizationService>();
+
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = "Spotify";
+})
+.AddCookie()
+.AddOAuth("Spotify", options =>
+{
+    options.ClientId = builder.Configuration["Spotify:ClientID"];
+    options.ClientSecret = builder.Configuration["Spotify:ClientSecret"];
+    options.CallbackPath = new PathString("/signin-spotify");
+    options.AuthorizationEndpoint = "https://accounts.spotify.com/authorize";
+    options.TokenEndpoint = "https://accounts.spotify.com/api/token";
+
+    options.ClaimActions.MapJsonKey("urn:spotify:external_id", "id");
+    options.ClaimActions.MapJsonKey("urn:spotify:display_name", "display_name");
+
+    options.SaveTokens = true;
+});
+
+builder.Services.Configure<SpotifySettings>(builder.Configuration.GetSection("Spotify"));
+builder.Services.AddScoped(sp =>
+{
+    var spotifySettings = sp.GetRequiredService<IOptions<SpotifySettings>>().Value;
+    return spotifySettings;
+});
+
+builder.Services.AddScoped<ISpotifyService, SpotifyApiWebService>();
+builder.Services.AddScoped<IFeedService, FeedService>();
+builder.Services.AddScoped<IFeedStore, PostgreSqlStore>();
 
 
 var app = builder.Build();

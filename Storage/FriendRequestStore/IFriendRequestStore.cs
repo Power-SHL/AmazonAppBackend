@@ -1,4 +1,4 @@
-﻿using AmazonAppBackend.DTO;
+﻿using AmazonAppBackend.DTO.Friends;
 
 namespace AmazonAppBackend.Storage.FriendRequestStore;
 

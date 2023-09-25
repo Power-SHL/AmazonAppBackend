@@ -1,4 +1,4 @@
-﻿using AmazonAppBackend.DTO;
+﻿using AmazonAppBackend.DTO.Profiles;
 using AmazonAppBackend.Exceptions.ImageExceptions;
 using AmazonAppBackend.Exceptions.ProfileExceptions;
 using AmazonAppBackend.Extensions;

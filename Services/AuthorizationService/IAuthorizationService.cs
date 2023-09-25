@@ -1,4 +1,4 @@
-﻿using AmazonAppBackend.DTO;
+﻿using AmazonAppBackend.DTO.Profiles;
 using System.Security.Claims;
 
 namespace AmazonAppBackend.Services.AuthorizationService;

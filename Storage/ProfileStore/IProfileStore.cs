@@ -1,4 +1,6 @@
-﻿using AmazonAppBackend.DTO;
+﻿using AmazonAppBackend.DTO.Friends;
+using AmazonAppBackend.DTO.Profiles;
+
 namespace AmazonAppBackend.Storage.ProfileStore;
 public interface IProfileStore
 {

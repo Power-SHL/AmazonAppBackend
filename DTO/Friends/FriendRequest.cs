@@ -1,7 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+using AmazonAppBackend.DTO.Profiles;
 
-namespace AmazonAppBackend.DTO;
+namespace AmazonAppBackend.DTO.Friends;
 
 public record FriendRequest
 {

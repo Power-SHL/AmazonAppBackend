@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
-namespace AmazonAppBackend.DTO;
+using AmazonAppBackend.DTO.Profiles;
+
+namespace AmazonAppBackend.DTO.Friends;
 public record Friendship
 {
     public string User1 { get; set; }

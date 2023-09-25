@@ -1,6 +1,6 @@
 ﻿using Amazon.S3.Model;
 using AmazonAppBackend.Configuration.Settings;
-using AmazonAppBackend.DTO;
+using AmazonAppBackend.DTO.Profiles;
 using AmazonAppBackend.Exceptions.AuthenticationExceptions;
 using AmazonAppBackend.Exceptions.ProfileExceptions;
 using AmazonAppBackend.Extensions;

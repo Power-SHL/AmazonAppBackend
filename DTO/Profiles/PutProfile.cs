@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
-namespace AmazonAppBackend.DTO;
+
+namespace AmazonAppBackend.DTO.Profiles;
 
 public record PutProfile
 {
