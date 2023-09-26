@@ -53,40 +53,47 @@ public class JWTAuthorizationService : IAuthorizationService
 
     public async Task<AuthenticationToken> AuthorizeUser(SignInRequest request)
     {
-        Profile profile;
-        if (request.LogInString.IsValidEmail())
+        try
         {
-            profile = await _profileService.GetProfileByEmail(request.LogInString);
-        }
-        else if (request.LogInString.IsValidUsername())
-        {
-            profile = await _profileService.GetProfile(request.LogInString);
-        }
-        else
-        {
-            throw new ProfileInvalidException("Invalid username or email");
-        }
+            Profile profile;
+            if (request.LogInString.IsValidEmail())
+            {
+                profile = await _profileService.GetProfileByEmail(request.LogInString);
+            }
+            else if (request.LogInString.IsValidUsername())
+            {
+                profile = await _profileService.GetProfile(request.LogInString);
+            }
+            else
+            {
+                throw new ProfileInvalidException("Invalid username or email");
+            }
 
-        if (request.Password.BCryptVerify(profile.Password))
-        {
-            var claims = new[] {
+            if (request.Password.BCryptVerify(profile.Password))
+            {
+                var claims = new[] {
                         new Claim(ClaimTypes.Name, profile.Username)
                 };
-            var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config.SecretKey));
-            var signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
-            var jwtSecurityToken = new JwtSecurityToken(
-                issuer: _config.Issuer,
-                audience: _config.Audience,
-                claims: claims,
-                expires: DateTime.Now.AddHours(12),
-                signingCredentials: signinCredentials
-            );
+                var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config.SecretKey));
+                var signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
+                var jwtSecurityToken = new JwtSecurityToken(
+                    issuer: _config.Issuer,
+                    audience: _config.Audience,
+                    claims: claims,
+                    expires: DateTime.Now.AddHours(12),
+                    signingCredentials: signinCredentials
+                );
 
-            var token = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
-            var expiration = jwtSecurityToken.ValidTo;
+                var token = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
+                var expiration = jwtSecurityToken.ValidTo;
 
-            return new AuthenticationToken(token, expiration);
+                return new AuthenticationToken(token, expiration, profile.Username);
+            }
+            throw new IncorrectPasswordException("Entered password is incorrect");
         }
-        throw new IncorrectPasswordException("Entered password is incorrect");
+        catch
+        {
+            throw new IncorrectPasswordException("Entered password is incorrect");
+        }
     }
 }

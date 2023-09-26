@@ -191,6 +191,10 @@ public class ProfileController : ControllerBase
             {
                 return BadRequest(e.Message);
             }
+            if (e is UnauthorizedAccessException)
+            {
+                return Unauthorized(e.Message);
+            }
             throw;
         }
     }

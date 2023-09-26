@@ -6,6 +6,8 @@ using AmazonAppBackend.Exceptions.FriendExceptions;
 using AmazonAppBackend.Exceptions.ResetPasswordExceptions;
 using AmazonAppBackend.DTO.Friends;
 using AmazonAppBackend.DTO.Profiles;
+using AmazonAppBackend.DTO.Feed;
+using AmazonAppBackend.Exceptions.FeedExceptions;
 
 namespace AmazonAppBackend.Extensions;
 public static class SecurityExtension
@@ -210,6 +212,25 @@ public static class SecurityExtension
         if (errorMessage.Length != 0)
         {
             throw new ResetPasswordRequestInvalidException(errorMessage.ToString());
+        }
+    }
+
+    public static void ValidateDeleteRequest(this DeletePostRequest request)
+    {
+        List<string> platforms = new() { "spotify" };
+        StringBuilder errorMessage = new();
+
+        if (!platforms.Contains(request.Platform))
+        {
+            errorMessage.Append("Platform is invalid.\n");
+        }
+        if (!request.Username.IsValidUsername())
+        {
+            errorMessage.Append("Username format is invalid.\n");
+        }
+        if (errorMessage.Length != 0)
+        {
+            throw new PostDeleteInvalidException(errorMessage.ToString());
         }
     }
 }
