@@ -1,4 +1,5 @@
-﻿using AmazonAppBackend.DTO.Social;
+﻿using AmazonAppBackend.DTO.Feed;
+using AmazonAppBackend.DTO.Social;
 using AmazonAppBackend.Services.PostService;
 using AmazonAppBackend.Services.ProfileService;
 using AmazonAppBackend.Storage.FeedStore;
@@ -22,5 +23,15 @@ public class FeedService : IFeedService
         string token = await _spotifyService.GetToken();
         await Task.WhenAll(_profileService.GetProfile(post.Username), _spotifyService.GetSong(post.ContentId, token));
         await _feedStore.CreatePost(post);
+    }
+
+    public async Task DeletePost(DeletePostRequest request)
+    {
+        await _feedStore.DeletePost(request);
+    }
+
+    public async Task<List<Post>> GetPostsOfFriends(string username, int pageNumber, int pageSize)
+    {
+        return await _feedStore.GetPostsOfFriends(username, pageNumber, pageSize);
     }
 }

@@ -10,6 +10,7 @@ using AmazonAppBackend.DTO.Profiles;
 using AmazonAppBackend.Storage.FeedStore;
 using AmazonAppBackend.DTO.Social;
 using AmazonAppBackend.Exceptions.FeedExceptions;
+using AmazonAppBackend.DTO.Feed;
 
 namespace AmazonAppBackend.Storage;
 
@@ -48,7 +49,7 @@ public class PostgreSqlStore : IProfileStore, IFriendRequestStore, IFeedStore
 
     public async Task<Profile> VerifyProfile(string username)
     {
-        var unverifiedProfile = await _context.UnverifiedProfiles.FindAsync(username) 
+        var unverifiedProfile = await _context.UnverifiedProfiles.FindAsync(username)
                       ?? throw new ProfileNotFoundException($"Profile {username} not found");
         _context.UnverifiedProfiles.Remove(unverifiedProfile);
 
@@ -80,7 +81,7 @@ public class PostgreSqlStore : IProfileStore, IFriendRequestStore, IFeedStore
 
     public async Task DeleteProfile(string username)
     {
-        var profile = await _context.Profiles.FindAsync(username) 
+        var profile = await _context.Profiles.FindAsync(username)
                       ?? throw new ProfileNotFoundException($"Profile {username} not found.");
         _context.Profiles.Remove(profile);
         if (await _context.SaveChangesAsync() == 0)
@@ -105,7 +106,7 @@ public class PostgreSqlStore : IProfileStore, IFriendRequestStore, IFeedStore
 
     public async Task AddFriend(string friend1, string friend2)
     {
-        Friendship friendship = string.Compare(friend1, friend2, StringComparison.OrdinalIgnoreCase) < 0 ? 
+        Friendship friendship = string.Compare(friend1, friend2, StringComparison.OrdinalIgnoreCase) < 0 ?
                                 new Friendship(friend1, friend2) : new Friendship(friend2, friend1);
         try
         {
@@ -231,5 +232,29 @@ public class PostgreSqlStore : IProfileStore, IFriendRequestStore, IFeedStore
         {
             throw new PostDuplicateException($"Post by {post.Username} on {post.Username} already exists.");
         }
+    }
+
+    public async Task DeletePost(DeletePostRequest request)
+    {
+        var postToDelete = await _context.Posts
+                .FirstOrDefaultAsync(p => p.Platform == request.Platform && p.Username == request.Username) 
+                ?? throw new PostNotFoundException($"{request.Platform} post from {request.Username} not found");
+
+        _context.Posts.Remove(postToDelete);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task<List<Post>> GetPostsOfFriends(string username, int pageNumber, int pageSize)
+    {
+        var friends = (await GetFriends(username)).Select(friend => friend.Username).ToList();
+        int postsToSkip = (pageNumber - 1) * pageSize;
+
+        var recentPosts = await _context.Posts
+            .Where(p => friends.Contains(p.Username))
+            .OrderByDescending(p => p.TimeCreated)
+            .Skip(postsToSkip)
+            .Take(pageSize)
+            .ToListAsync();
+        return recentPosts.Any() ? recentPosts : throw new PostNotFoundException($"No posts found for {username}");
     }
 }
