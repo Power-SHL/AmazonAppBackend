@@ -14,7 +14,7 @@ public record FriendRequest
     public Profile ReceiverProfile;
 
     [JsonConstructor]
-    public FriendRequest(string sender, string receiver)
+    public FriendRequest([Required] string sender, [Required] string receiver)
     {
         Sender = sender.ToLower();
         Receiver = receiver.ToLower();

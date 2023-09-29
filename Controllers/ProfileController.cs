@@ -113,24 +113,17 @@ public class ProfileController : ControllerBase
         try
         {
             var profile = await _profileService.VerifyProfile(username, verificationCode);
-
             return CreatedAtAction(nameof(GetProfile), new { username = profile.Username }, profile);
         }
         catch (Exception e)
         {
-            if (e is ProfileDuplicateException)
-            {
-                return Conflict("Cannot create profile.\n" + e.Message);
-            }
-
-            if (e is ProfileInvalidException)
-            {
-                return BadRequest(e.Message);
-            }
-
             if (e is ProfileVerificationException)
             {
-                return BadRequest("Incorrect verification code.");
+                return Unauthorized("Incorrect verification code.");
+            }
+            if (e is ProfileNotFoundException)
+            {
+                return NotFound($"Profile {username} not found");
             }
 
             throw;
