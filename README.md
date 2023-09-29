@@ -664,8 +664,6 @@ Please note that authorization is enforced to ensure that only authorized users 
 
 <details>
 <summary><h2>Spotify API Documentation</h2></summary>
-  # Spotify Controller
-
 The Spotify Controller provides endpoints for interacting with the Spotify API to retrieve song and playlist information.
 
 ## GetSpotifyToken
@@ -690,7 +688,7 @@ The Spotify Controller provides endpoints for interacting with the Spotify API t
 
 ## GetTrack
 
-**Endpoint:** `/api/spotify/song`
+**Endpoint:** `/api/spotify/song?songId={songId}&token={token}`
 
 **Method:** GET
 
@@ -714,7 +712,7 @@ The Spotify Controller provides endpoints for interacting with the Spotify API t
 
 ## GetAlbum
 
-**Endpoint:** `/api/spotify/album`
+**Endpoint:** `/api/spotify/album?albumId={albumId}&token={token}`
 
 **Method:** GET
 
@@ -738,7 +736,7 @@ The Spotify Controller provides endpoints for interacting with the Spotify API t
 
 ## GetPlaylist
 
-**Endpoint:** `/api/spotify/playlist`
+**Endpoint:** `/api/spotify/playlist?playlistId={playlistId}&token={token}`
 
 **Method:** GET
 
@@ -768,7 +766,6 @@ Please note that the endpoints may return error responses in case of token expir
 </details>
 <details>
 <summary><h2>Feed API Documentation</h2></summary>
-# Feed Controller
 
 The Feed Controller provides endpoints for managing user posts and retrieving posts from friends.
 
@@ -799,8 +796,6 @@ The Feed Controller provides endpoints for managing user posts and retrieving po
   - Body: Indicates that the user's profile was not found.
 - Status: 409 Conflict
   - Body: Indicates that a post with the same content already exists.
-- Status: 401 Unauthorized
-  - Body: Indicates that the user is not authorized to perform this action.
 
 ## DeletePost
 
@@ -832,7 +827,7 @@ The Feed Controller provides endpoints for managing user posts and retrieving po
 
 ## GetPostsOfFriends
 
-**Endpoint:** `/api/feed`
+**Endpoint:** `/api/feed?username={username}&pageNumber={pageNumber}&pageSize={pageSize}`
 
 **Method:** GET
 
