@@ -108,7 +108,7 @@ public class FeedController : ControllerBase
             {
                 return Unauthorized(e.Message);
             }
-            if (e is PostNotFoundException)
+            if (e is PostNotFoundException || e is FriendNotFoundException)
             {
                 return NotFound($"No more posts found for user {username}");
             }
