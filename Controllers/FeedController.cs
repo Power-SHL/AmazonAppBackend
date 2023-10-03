@@ -2,6 +2,7 @@
 using AmazonAppBackend.DTO.Social;
 using AmazonAppBackend.Exceptions.FeedExceptions;
 using AmazonAppBackend.Exceptions.ProfileExceptions;
+using AmazonAppBackend.Exceptions.FriendExceptions;
 using AmazonAppBackend.Extensions;
 using AmazonAppBackend.Services.AuthorizationService;
 using AmazonAppBackend.Services.FeedService;
